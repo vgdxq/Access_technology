@@ -1,0 +1,172 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\filemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\filemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\filemanager.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\filemanager.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\tbd_yaroshenko\\filemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\filemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\tbd_yaroshenko\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\tbd_yaroshenko\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "FileManager.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\FileManager.Designer.cs",
+              "RelativeDocumentMoniker": "TBD_Yaroshenko\\FileManager.Designer.cs",
+              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\FileManager.Designer.cs",
+              "RelativeToolTip": "TBD_Yaroshenko\\FileManager.Designer.cs",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAgwD8AAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-01T15:42:22.863Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "FileManager.cs",
+              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\FileManager.cs",
+              "RelativeDocumentMoniker": "TBD_Yaroshenko\\FileManager.cs",
+              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\FileManager.cs",
+              "RelativeToolTip": "TBD_Yaroshenko\\FileManager.cs",
+              "ViewState": "AgIAAHEAAAAAAAAAAAAwwIgAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-28T16:42:04.375Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\Form1.cs",
+              "RelativeDocumentMoniker": "TBD_Yaroshenko\\Form1.cs",
+              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\Form1.cs",
+              "RelativeToolTip": "TBD_Yaroshenko\\Form1.cs",
+              "ViewState": "AgIAAJIAAAAAAAAAAAArwLAAAABJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-02T10:31:38.824Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Form2.cs",
+              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\Form2.cs",
+              "RelativeDocumentMoniker": "TBD_Yaroshenko\\Form2.cs",
+              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\Form2.cs",
+              "RelativeToolTip": "TBD_Yaroshenko\\Form2.cs",
+              "ViewState": "AgIAALsAAAAAAAAAAAA7wN4AAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-25T13:59:12.58Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "App.config",
+              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\App.config",
+              "RelativeDocumentMoniker": "TBD_Yaroshenko\\App.config",
+              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\App.config",
+              "RelativeToolTip": "TBD_Yaroshenko\\App.config",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
+              "WhenOpened": "2025-03-01T15:24:23.021Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Form1.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\Form1.Designer.cs",
+              "RelativeDocumentMoniker": "TBD_Yaroshenko\\Form1.Designer.cs",
+              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\Form1.Designer.cs",
+              "RelativeToolTip": "TBD_Yaroshenko\\Form1.Designer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-28T20:51:15.423Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Form1.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\Form1.cs",
+              "RelativeDocumentMoniker": "TBD_Yaroshenko\\Form1.cs",
+              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\Form1.cs [Design]",
+              "RelativeToolTip": "TBD_Yaroshenko\\Form1.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-28T20:09:15.02Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Form2.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\Form2.cs",
+              "RelativeDocumentMoniker": "TBD_Yaroshenko\\Form2.cs",
+              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\Form2.cs [Design]",
+              "RelativeToolTip": "TBD_Yaroshenko\\Form2.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-28T20:19:50.598Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "FileManager.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\FileManager.cs",
+              "RelativeDocumentMoniker": "TBD_Yaroshenko\\FileManager.cs",
+              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\FileManager.cs [Design]",
+              "RelativeToolTip": "TBD_Yaroshenko\\FileManager.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-28T19:20:48.743Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
