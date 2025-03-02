@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Printing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,10 +20,12 @@ namespace TBD_Yaroshenko
         private string folderPath = @"C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\Data"; // Шлях до папки
         private string selectedFile = ""; // Для збереження вибраного файлу
         private string fileConfidentiality = ""; // Для збереження мітки конфіденційності
-        private string connectionString = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString; //Підключення до БД
+        private string connectionString = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString; // Підключення до БД
         private string selectedUser = ""; // Для збереження вибраного користувача
         private string userRole = ""; // Для збереження рівня доступу користувача
 
+        // Додано властивість для зберігання ролі користувача
+        public string UserRole { get; set; }
 
         public Form2()
         {
@@ -33,10 +36,18 @@ namespace TBD_Yaroshenko
 
         private void Form2_Load(object sender, EventArgs e)
         {
-
+            // Перевіряємо роль користувача і відображаємо кнопку button_settings лише для адміністратора
+            if (UserRole == "Admin")
+            {
+                button_settings.Visible = true;
+            }
+            else
+            {
+                button_settings.Visible = false;
+            }
         }
 
-        //LOG OUT
+        // LOG OUT
         private void button2_Click(object sender, EventArgs e)
         {
             this.Hide();
@@ -51,9 +62,8 @@ namespace TBD_Yaroshenko
             }
         }
 
-
         // MENU SETTINGS
-        private void button3_Click(object sender, EventArgs e)
+        private void button_settings_Click(object sender, EventArgs e)
         {
             panelSettings.Visible = !panelSettings.Visible;
             panelSettings.BringToFront();
@@ -63,6 +73,7 @@ namespace TBD_Yaroshenko
         {
             LoadFiles(); // Викликаємо метод для завантаження файлів
         }
+
         private void LoadFiles()
         {
             if (Directory.Exists(folderPath)) // Перевіряємо, чи існує папка
@@ -92,7 +103,6 @@ namespace TBD_Yaroshenko
             }
         }
 
-
         private void radioButtonSecret_CheckedChanged(object sender, EventArgs e)
         {
             if (radioButtonSecret.Checked)
@@ -105,7 +115,7 @@ namespace TBD_Yaroshenko
         {
             if (radioButtonConfidential.Checked)
             {
-                fileConfidentiality = "Confidentialy";
+                fileConfidentiality = "Confidential";
             }
         }
 
@@ -121,7 +131,34 @@ namespace TBD_Yaroshenko
         {
             if (!string.IsNullOrEmpty(fileConfidentiality))
             {
-                MessageBox.Show($"Мітка конфіденційності для файлу \"{selectedFile}\" успішно змінена на: {fileConfidentiality}", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                try
+                {
+                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    {
+                        connection.Open();
+                        string query = "IF EXISTS (SELECT 1 FROM FILE_ACCESS WHERE FILE_NAME = @fileName) " +
+                                      "UPDATE FILE_ACCESS SET CONFIDENTIALITY_LEVEL = @confidentiality WHERE FILE_NAME = @fileName " +
+                                      "ELSE " +
+                                      "INSERT INTO FILE_ACCESS (FILE_NAME, CONFIDENTIALITY_LEVEL) VALUES (@fileName, @confidentiality)";
+                        SqlCommand cmd = new SqlCommand(query, connection);
+                        cmd.Parameters.AddWithValue("@fileName", selectedFile);
+                        cmd.Parameters.AddWithValue("@confidentiality", fileConfidentiality);
+
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            MessageBox.Show($"Мітка конфіденційності для файлу \"{selectedFile}\" успішно змінена на: {fileConfidentiality}", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Не вдалося зберегти мітку конфіденційності.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Помилка при збереженні мітки конфіденційності: " + ex.Message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             else
             {
@@ -133,6 +170,7 @@ namespace TBD_Yaroshenko
         {
             LoadUsers(); // Завантажуємо користувачів з БД
         }
+
         private void LoadUsers()
         {
             try
@@ -140,7 +178,7 @@ namespace TBD_Yaroshenko
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
-                    string query = "SELECT USERNAME FROM LOGIN_TBL"; // Заміни "Users" на назву твоєї таблиці, де зберігаються користувачі
+                    string query = "SELECT USERNAME FROM LOGIN_TBL";
 
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
@@ -152,7 +190,7 @@ namespace TBD_Yaroshenko
                             string username = reader["USERNAME"]?.ToString();
                             if (!string.IsNullOrEmpty(username))
                             {
-                                comboBoxUsers.Items.Add(username); // Додаємо користувачів в ComboBox
+                                comboBoxUsers.Items.Add(username);
                             }
                         }
                     }
@@ -174,8 +212,6 @@ namespace TBD_Yaroshenko
                 panelActions.BringToFront(); // Переміщаємо панель на передній план
             }
         }
-
-
 
         private void radioButtonAdmin_CheckedChanged(object sender, EventArgs e)
         {
@@ -205,7 +241,46 @@ namespace TBD_Yaroshenko
         {
             if (!string.IsNullOrEmpty(userRole))
             {
-                MessageBox.Show($"Рівень доступу для користувача \"{selectedUser}\" успішно змінено на: {userRole}", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                try
+                {
+                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    {
+                        connection.Open();
+
+                        // Отримуємо складність пароля користувача
+                        string passwordComplexityQuery = "SELECT PASSWORD_COMPLEXITY FROM LOGIN_TBL WHERE USERNAME = @username";
+                        SqlCommand passwordComplexityCmd = new SqlCommand(passwordComplexityQuery, connection);
+                        passwordComplexityCmd.Parameters.AddWithValue("@username", selectedUser);
+                        string passwordComplexity = passwordComplexityCmd.ExecuteScalar()?.ToString();
+
+                        // Перевіряємо, чи пароль складний для високих рівнів доступу
+                        if ((userRole == "Admin" || userRole == "Developer") && passwordComplexity != "High")
+                        {
+                            MessageBox.Show("Для призначення ролей 'Admin' або 'Developer' пароль користувача повинен бути складним.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+
+                        // Оновлюємо роль користувача
+                        string updateRoleQuery = "UPDATE LOGIN_TBL SET ROLE = @role WHERE USERNAME = @username";
+                        SqlCommand updateRoleCmd = new SqlCommand(updateRoleQuery, connection);
+                        updateRoleCmd.Parameters.AddWithValue("@role", userRole);
+                        updateRoleCmd.Parameters.AddWithValue("@username", selectedUser);
+
+                        int rowsAffected = updateRoleCmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            MessageBox.Show($"Рівень доступу для користувача \"{selectedUser}\" успішно змінено на: {userRole}", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Не вдалося зберегти рівень доступу.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Помилка при збереженні рівня доступу: " + ex.Message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             else
             {
@@ -213,16 +288,15 @@ namespace TBD_Yaroshenko
             }
         }
 
-        //FILE MANAGER
+        // FILE MANAGER
         private void buttonFileManager_Click_1(object sender, EventArgs e)
         {
-            FileManager fileManagerForm = new FileManager();  // Створюємо нове вікно
-            fileManagerForm.Show();  // Відкриваємо його
+            FileManager fileManagerForm = new FileManager(UserRole);  // Передаємо роль користувача
+            fileManagerForm.Show();  // Відкриваємо FileManager
         }
 
         private void panelActions_Paint(object sender, PaintEventArgs e)
         {
-
         }
     }
 }

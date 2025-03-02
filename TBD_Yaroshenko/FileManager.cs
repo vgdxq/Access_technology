@@ -3,22 +3,27 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Configuration;
+using System.Data.SqlClient;
+using System.Linq;
 
 namespace TBD_Yaroshenko
 {
     public partial class FileManager : Form
     {
         private string currentFilePath = string.Empty;
-        private Bitmap currentImage;  // Використовуємо Bitmap для редагування зображення
+        private Bitmap currentImage;
+        private string cs = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString;
+        private string userRole; // Додано поле для зберігання ролі користувача
 
-        public FileManager()
+        // Конструктор з параметром для передачі ролі користувача
+        public FileManager(string role)
         {
             InitializeComponent();
-
-            // За замовчуванням кнопки та pictureBox не видимі
             buttonRotate.Visible = false;
             btnSave.Visible = false;
             pictureBox.Visible = false;
+            userRole = role; // Зберігаємо роль користувача
         }
 
         private void LoadFiles(string folderPath)
@@ -28,14 +33,97 @@ namespace TBD_Yaroshenko
                 string[] files = Directory.GetFiles(folderPath);
                 listBoxFiles.Items.Clear();
 
-                foreach (string file in files)
+                using (SqlConnection con = new SqlConnection(cs))
                 {
-                    listBoxFiles.Items.Add(Path.GetFileName(file));
+                    con.Open();
+
+                    // Отримуємо список файлів з бази даних
+                    string selectQuery = "SELECT FILE_NAME, CONFIDENTIALITY_LEVEL FROM FILE_ACCESS";
+                    SqlCommand selectCmd = new SqlCommand(selectQuery, con);
+                    SqlDataReader reader = selectCmd.ExecuteReader();
+
+                    // Збираємо всі файли з бази даних
+                    var dbFiles = new System.Collections.Generic.List<(string FileName, string ConfidentialityLevel)>();
+                    while (reader.Read())
+                    {
+                        dbFiles.Add((reader["FILE_NAME"].ToString(), reader["CONFIDENTIALITY_LEVEL"].ToString()));
+                    }
+                    reader.Close();
+
+                    // Видаляємо файли з бази даних, яких немає в папці
+                    foreach (var dbFile in dbFiles)
+                    {
+                        if (!files.Any(f => Path.GetFileName(f) == dbFile.FileName))
+                        {
+                            string deleteQuery = "DELETE FROM FILE_ACCESS WHERE FILE_NAME = @FileName";
+                            using (SqlCommand deleteCmd = new SqlCommand(deleteQuery, con))
+                            {
+                                deleteCmd.Parameters.AddWithValue("@FileName", dbFile.FileName);
+                                deleteCmd.ExecuteNonQuery();
+                            }
+                        }
+                    }
+
+                    // Додаємо нові файли до бази даних і фільтруємо їх за роллю користувача
+                    foreach (string file in files)
+                    {
+                        string fileName = Path.GetFileName(file);
+
+                        // Перевіряємо, чи файл вже є в базі даних
+                        string checkQuery = "SELECT COUNT(*) FROM FILE_ACCESS WHERE FILE_NAME = @FileName";
+                        using (SqlCommand checkCmd = new SqlCommand(checkQuery, con))
+                        {
+                            checkCmd.Parameters.AddWithValue("@FileName", fileName);
+                            int fileExists = (int)checkCmd.ExecuteScalar();
+
+                            // Якщо файлу немає в базі даних, додаємо його
+                            if (fileExists == 0)
+                            {
+                                string insertQuery = "INSERT INTO FILE_ACCESS (FILE_NAME, CONFIDENTIALITY_LEVEL) VALUES (@FileName, @ConfidentialityLevel)";
+                                using (SqlCommand insertCmd = new SqlCommand(insertQuery, con))
+                                {
+                                    insertCmd.Parameters.AddWithValue("@FileName", fileName);
+                                    insertCmd.Parameters.AddWithValue("@ConfidentialityLevel", "Secret"); // Рівень конфіденційності за замовчуванням
+                                    insertCmd.ExecuteNonQuery();
+                                }
+                            }
+                        }
+
+                        // Отримуємо рівень конфіденційності файлу з бази даних
+                        string confidentialityQuery = "SELECT CONFIDENTIALITY_LEVEL FROM FILE_ACCESS WHERE FILE_NAME = @FileName";
+                        using (SqlCommand confidentialityCmd = new SqlCommand(confidentialityQuery, con))
+                        {
+                            confidentialityCmd.Parameters.AddWithValue("@FileName", fileName);
+                            string confidentialityLevel = confidentialityCmd.ExecuteScalar()?.ToString();
+
+                            // Фільтруємо файли відповідно до ролі користувача
+                            if (IsFileAccessAllowed(confidentialityLevel))
+                            {
+                                listBoxFiles.Items.Add(fileName);
+                            }
+                        }
+                    }
                 }
             }
             else
             {
                 MessageBox.Show("Папка не знайдена!", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Метод для перевірки доступу до файлу на основі ролі користувача
+        private bool IsFileAccessAllowed(string confidentialityLevel)
+        {
+            switch (userRole)
+            {
+                case "Admin":
+                    return true; // Адміністратор бачить всі файли
+                case "Developer":
+                    return confidentialityLevel == "Confidential" || confidentialityLevel == "Public";
+                case "User":
+                    return confidentialityLevel == "Public";
+                default:
+                    return false; // Якщо роль не визначена, доступ заборонений
             }
         }
 
@@ -59,13 +147,8 @@ namespace TBD_Yaroshenko
 
                     if (fileExtension == ".png" || fileExtension == ".jpg" || fileExtension == ".jpeg" || fileExtension == ".gif")
                     {
-                        // Показуємо pictureBox
                         pictureBox.Visible = true;
-
-                        // Закриваємо попереднє зображення, якщо воно є
                         currentImage?.Dispose();
-
-                        // Завантажуємо нове зображення в Bitmap (копія, щоб уникнути блокування файлу)
                         using (var tempImage = Image.FromFile(currentFilePath))
                         {
                             currentImage = new Bitmap(tempImage);
@@ -73,19 +156,14 @@ namespace TBD_Yaroshenko
 
                         pictureBox.Image = currentImage;
                         pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
-
-                        // Показуємо кнопки для роботи з зображенням
                         buttonRotate.Visible = true;
                         btnSave.Visible = true;
                     }
                     else
                     {
-                        // Ховаємо pictureBox та кнопки, якщо файл не є зображенням
                         pictureBox.Visible = false;
                         buttonRotate.Visible = false;
                         btnSave.Visible = false;
-
-                        // Закриваємо попереднє зображення, якщо воно є
                         currentImage?.Dispose();
                         currentImage = null;
                         pictureBox.Image = null;
@@ -111,12 +189,9 @@ namespace TBD_Yaroshenko
             }
             else
             {
-                // Якщо нічого не обрано, ховаємо pictureBox та кнопки
                 pictureBox.Visible = false;
                 buttonRotate.Visible = false;
                 btnSave.Visible = false;
-
-                // Закриваємо попереднє зображення, якщо воно є
                 currentImage?.Dispose();
                 currentImage = null;
                 pictureBox.Image = null;
@@ -127,7 +202,6 @@ namespace TBD_Yaroshenko
         {
             if (currentImage != null)
             {
-                // Повертаємо зображення
                 currentImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
                 pictureBox.Image = currentImage;
                 pictureBox.Invalidate();
@@ -140,7 +214,6 @@ namespace TBD_Yaroshenko
             {
                 try
                 {
-                    // Зберігаємо зображення у файл
                     currentImage.Save(currentFilePath, System.Drawing.Imaging.ImageFormat.Png);
                     MessageBox.Show("Зміни збережено!", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -157,7 +230,6 @@ namespace TBD_Yaroshenko
 
         private void pictureBox_Click(object sender, EventArgs e)
         {
-
         }
     }
 }

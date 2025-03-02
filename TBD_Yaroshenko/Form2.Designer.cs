@@ -30,7 +30,7 @@
         {
             buttonFileManager = new Button();
             button2 = new Button();
-            button3 = new Button();
+            button_settings = new Button();
             panelSettings = new Panel();
             panelActions = new Panel();
             btnSaveRole = new Button();
@@ -75,16 +75,16 @@
             button2.UseVisualStyleBackColor = true;
             button2.Click += button2_Click;
             // 
-            // button3
+            // button_settings
             // 
-            button3.Font = new Font("SimSun", 10.8F);
-            button3.Location = new Point(64, 74);
-            button3.Name = "button3";
-            button3.Size = new Size(165, 29);
-            button3.TabIndex = 3;
-            button3.Text = "Settings";
-            button3.UseVisualStyleBackColor = true;
-            button3.Click += button3_Click;
+            button_settings.Font = new Font("SimSun", 10.8F);
+            button_settings.Location = new Point(64, 74);
+            button_settings.Name = "button_settings";
+            button_settings.Size = new Size(165, 29);
+            button_settings.TabIndex = 3;
+            button_settings.Text = "Settings";
+            button_settings.UseVisualStyleBackColor = true;
+            button_settings.Click += button_settings_Click;
             // 
             // panelSettings
             // 
@@ -101,6 +101,7 @@
             panelSettings.Size = new Size(489, 357);
             panelSettings.TabIndex = 4;
             panelSettings.Visible = false;
+ 
             // 
             // panelActions
             // 
@@ -115,7 +116,7 @@
             panelActions.Size = new Size(387, 202);
             panelActions.TabIndex = 7;
             panelActions.Visible = false;
-            panelActions.Paint += panelActions_Paint;
+
             // 
             // btnSaveRole
             // 
@@ -171,10 +172,10 @@
             // 
             labelSelectedUser.AutoSize = true;
             labelSelectedUser.BorderStyle = BorderStyle.Fixed3D;
-            labelSelectedUser.Font = new Font("SimSun", 10.8F);
+            labelSelectedUser.Font = new Font("SimSun", 7.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
             labelSelectedUser.Location = new Point(14, 11);
             labelSelectedUser.Name = "labelSelectedUser";
-            labelSelectedUser.Size = new Size(46, 20);
+            labelSelectedUser.Size = new Size(37, 15);
             labelSelectedUser.TabIndex = 0;
             labelSelectedUser.Text = "Name";
             // 
@@ -305,7 +306,7 @@
             BackColor = SystemColors.ButtonFace;
             ClientSize = new Size(838, 381);
             Controls.Add(panelSettings);
-            Controls.Add(button3);
+            Controls.Add(button_settings);
             Controls.Add(button2);
             Controls.Add(buttonFileManager);
             Name = "Form2";
@@ -326,7 +327,7 @@
         private ToolStripMenuItem вітаємоToolStripMenuItem;
         private Button buttonFileManager;
         private Button button2;
-        private Button button3;
+        private Button button_settings;
         private Panel panelSettings;
         private ComboBox comboBoxFiles;
         private ComboBox comboBoxUsers;

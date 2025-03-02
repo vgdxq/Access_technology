@@ -8,10 +8,11 @@ using System.Diagnostics;
 namespace TBD_Yaroshenko
 {
     public partial class Form1 : Form
-    {   //рядок підключення до бази даних, який береться з конфігураційного файлу.
+    {
+        // Рядок підключення до бази даних, який береться з конфігураційного файлу.
         string cs = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString;
 
-        //регулярний вираз для перевірки складності пароля
+        // Регулярний вираз для перевірки складності пароля
         string complexPattern = "(?=^.{8,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$";
 
         public Form1()
@@ -19,13 +20,13 @@ namespace TBD_Yaroshenko
             InitializeComponent();
         }
 
-        //Виводить інформацію про виконавця
+        // Виводить інформацію про виконавця
         private void довідкаToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Performed by: Yaroshenko Iryna, group B-125-21-3-B");
         }
 
-        //Перевіряє, чи поле для логіну не порожнє. Якщо порожнє, видає помилку
+        // Перевіряє, чи поле для логіну не порожнє. Якщо порожнє, видає помилку
         private void textBox1_Leave(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(textBox1.Text))
@@ -38,6 +39,7 @@ namespace TBD_Yaroshenko
                 errorProvider1.Clear();
             }
         }
+
         // Метод для визначення складності пароля
         private string GetPasswordComplexity(string password)
         {
@@ -50,7 +52,6 @@ namespace TBD_Yaroshenko
                 return "Low";
             }
         }
-
 
         private void InsertPasswordHistory(string username, string password)
         {
@@ -115,9 +116,7 @@ namespace TBD_Yaroshenko
             }
         }
 
-
-
-        //Перевіряє, чи пароль відповідає вимогам складності
+        // Перевіряє, чи пароль відповідає вимогам складності
         private void textBox2_Leave(object sender, EventArgs e)
         {
             if (checkBox2.Checked && !Regex.IsMatch(textBox2.Text, complexPattern))
@@ -131,9 +130,7 @@ namespace TBD_Yaroshenko
             }
         }
 
-
-
-        //Додає нового користувача в базу даних
+        // Додає нового користувача в базу даних
         private void button2_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text) || string.IsNullOrWhiteSpace(textBox2.Text))
@@ -163,11 +160,13 @@ namespace TBD_Yaroshenko
                     return;
                 }
 
-                // Додавання нового користувача
-                string insertQuery = "INSERT INTO login_tbl (username, pass) VALUES (@user, @pass)";
+                // Додавання нового користувача з роллю за замовчуванням "User"
+                string insertQuery = "INSERT INTO login_tbl (username, pass, password_complexity, ROLE) VALUES (@user, @pass, @complexity, @role)";
                 SqlCommand cmd = new SqlCommand(insertQuery, con);
                 cmd.Parameters.AddWithValue("@user", textBox1.Text);
                 cmd.Parameters.AddWithValue("@pass", textBox2.Text);
+                cmd.Parameters.AddWithValue("@complexity", GetPasswordComplexity(textBox2.Text));
+                cmd.Parameters.AddWithValue("@role", "User"); // Роль за замовчуванням
 
                 int result = cmd.ExecuteNonQuery();
                 if (result > 0)
@@ -188,7 +187,8 @@ namespace TBD_Yaroshenko
                 }
             }
         }
-        //Оновлює пароль користувача
+
+        // Оновлює пароль користувача
         private void button3_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text) || string.IsNullOrWhiteSpace(textBox2.Text))
@@ -231,16 +231,16 @@ namespace TBD_Yaroshenko
                 }
             }
         }
-        //Відображає або приховує пароль
-        private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
+
+        // Відображає або приховує пароль
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             textBox2.UseSystemPasswordChar = !checkBox1.Checked;
         }
 
-        //Перевіряє, чи поточний пароль відповідає вимогам складності
+        // Перевіряє, чи поточний пароль відповідає вимогам складності
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-
             if (checkBox2.Checked && !Regex.IsMatch(textBox2.Text, complexPattern))
             {
                 MessageBox.Show("The current password does not meet the new complexity requirements", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -276,9 +276,12 @@ namespace TBD_Yaroshenko
                     {
                         dr.Read(); // Читаємо результат
                         string username = dr["username"].ToString(); // Отримуємо логін з результату
-                        MessageBox.Show($"Login {username}, successfully authorized!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        string role = dr["ROLE"].ToString(); // Отримуємо роль з результату
+
+                        MessageBox.Show($"Login {username}, successfully authorized! Role: {role}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         {
                             Form2 form2 = new Form2();
+                            form2.UserRole = role; // Передаємо роль до Form2
                             form2.Show();
                             this.Hide(); // Ховаємо поточну форму
                         }
@@ -294,18 +297,19 @@ namespace TBD_Yaroshenko
                     MessageBox.Show("Database connection error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-
         }
 
         private void groupBox1_Enter(object sender, EventArgs e)
         {
-
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+        }
+
+        private void Form1_Load_1(object sender, EventArgs e)
+        {
 
         }
     }
-
 }
