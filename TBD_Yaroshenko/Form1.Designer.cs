@@ -103,7 +103,6 @@
             textBox2.Size = new Size(178, 27);
             textBox2.TabIndex = 1;
             textBox2.UseSystemPasswordChar = true;
-            textBox2.Leave += textBox2_Leave;
             // 
             // button1
             // 
@@ -141,7 +140,6 @@
             groupBox1.Size = new Size(345, 316);
             groupBox1.TabIndex = 3;
             groupBox1.TabStop = false;
-            groupBox1.Enter += groupBox1_Enter;
             // 
             // button2
             // 
@@ -186,7 +184,7 @@
             checkBox1.TabIndex = 3;
             checkBox1.Text = "Show password";
             checkBox1.UseVisualStyleBackColor = true;
-            checkBox1.CheckedChanged += checkBox1_CheckedChanged_1;
+            checkBox1.CheckedChanged += checkBox1_CheckedChanged;
             // 
             // Form1
             // 
@@ -199,7 +197,7 @@
             MainMenuStrip = menuStrip1;
             Name = "Form1";
             Text = "TBD_Yaroshenko";
-            Load += Form1_Load;
+            Load += Form1_Load_1;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).EndInit();
