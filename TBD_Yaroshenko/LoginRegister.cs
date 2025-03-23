@@ -15,6 +15,8 @@ namespace TBD_Yaroshenko
         public Form1()
         {
             InitializeComponent();
+            comboBoxAccessControl.Items.AddRange(new string[] { "Mandatory", "Discretionary", "Role-Based" });
+            comboBoxAccessControl.SelectedIndex = 0; // Значення за замовчуванням
         }
 
         private void довідкаToolStripMenuItem_Click(object sender, EventArgs e)
@@ -50,6 +52,7 @@ namespace TBD_Yaroshenko
                 MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         private bool IsPasswordInHistory(string username, string password)
         {
             try
@@ -142,9 +145,14 @@ namespace TBD_Yaroshenko
                 return;
             }
 
+            // Отримуємо вибраний тип розмежування з comboBoxAccessControl
+            string accessControlType = comboBoxAccessControl.SelectedItem?.ToString() ?? "Undefined";
+
             using (var con = new SqlConnection(cs))
             {
                 con.Open();
+
+                // Перевірка авторизації
                 string query = "SELECT * FROM LOGIN_TBL WHERE USERNAME = @user AND PASS = @pass";
                 var cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@user", textBox1.Text);
@@ -155,12 +163,35 @@ namespace TBD_Yaroshenko
                 {
                     dr.Read();
                     string role = dr["SECURITY_LEVEL"]?.ToString() ?? "Unclassified";
-                    MessageBox.Show($"Login successful! Security Level: {role}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    // Відкриваємо MainWind і передаємо ім'я користувача
-                    MainWind mainWind = new MainWind(textBox1.Text); // Викликаємо конструктор з параметром
-                    mainWind.Show();
-                    this.Hide();
+                    // Оновлення типу розмежування в базі даних
+                    dr.Close(); // Закриваємо DataReader перед виконанням наступного запиту
+                    string updateQuery = "UPDATE LOGIN_TBL SET ACCESS_CONTROL_TYPE = @accessControlType WHERE USERNAME = @user";
+                    var updateCmd = new SqlCommand(updateQuery, con);
+                    updateCmd.Parameters.AddWithValue("@accessControlType", accessControlType);
+                    updateCmd.Parameters.AddWithValue("@user", textBox1.Text);
+                    updateCmd.ExecuteNonQuery();
+
+                    MessageBox.Show($"Login successful! Security Level: {role}, Access Control Type: {accessControlType}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Відкриваємо відповідну форму залежно від типу контролю доступу
+                    if (accessControlType == "Discretionary")
+                    {
+                        MainWind_Discretionary mainWindDiscretionary = new MainWind_Discretionary(textBox1.Text, accessControlType); // Передаємо ім'я користувача
+                        mainWindDiscretionary.Show();
+                    }
+                    else if (accessControlType == "Role-Based")
+                    {
+                        MainWind_RoleBased mainWindRoleBased = new MainWind_RoleBased(textBox1.Text); // Передаємо ім'я користувача
+                        mainWindRoleBased.Show();
+                    }
+                    else
+                    {
+                        MainWind mainWind = new MainWind(textBox1.Text); // Стандартна форма для Mandatory
+                        mainWind.Show();
+                    }
+
+                    this.Hide(); // Приховуємо поточну форму (Form1)
                 }
                 else
                 {
@@ -168,6 +199,7 @@ namespace TBD_Yaroshenko
                 }
             }
         }
+
         private void button2_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text) || string.IsNullOrWhiteSpace(textBox2.Text))
@@ -195,12 +227,16 @@ namespace TBD_Yaroshenko
                         return;
                     }
 
+                    // Отримуємо вибраний тип розмежування з comboBoxAccessControl
+                    string accessControlType = comboBoxAccessControl.SelectedItem?.ToString() ?? "Undefined";
+
                     using (var insertCmd = new SqlCommand(
-                        "INSERT INTO LOGIN_TBL (USERNAME, PASS, PASSWORD_COMPLEXITY, SECURITY_LEVEL) VALUES (@user, @pass, @complexity, 'Unclassified')", con))
+                        "INSERT INTO LOGIN_TBL (USERNAME, PASS, PASSWORD_COMPLEXITY, SECURITY_LEVEL, ACCESS_CONTROL_TYPE) VALUES (@user, @pass, @complexity, 'Unclassified', @accessControlType)", con))
                     {
                         insertCmd.Parameters.Add(new SqlParameter("@user", SqlDbType.VarChar, 50)).Value = textBox1.Text;
                         insertCmd.Parameters.Add(new SqlParameter("@pass", SqlDbType.VarChar, 100)).Value = textBox2.Text;
                         insertCmd.Parameters.Add(new SqlParameter("@complexity", SqlDbType.VarChar, 10)).Value = GetPasswordComplexity(textBox2.Text);
+                        insertCmd.Parameters.Add(new SqlParameter("@accessControlType", SqlDbType.VarChar, 20)).Value = accessControlType;
                         insertCmd.ExecuteNonQuery();
                     }
 
@@ -270,5 +306,7 @@ namespace TBD_Yaroshenko
         {
 
         }
+
+       
     }
 }

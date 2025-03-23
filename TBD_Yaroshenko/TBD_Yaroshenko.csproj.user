@@ -10,5 +10,11 @@
     <Compile Update="MainWind.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="MainWind_Discretionary.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="MainWind_RoleBased.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

@@ -28,10 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             listBoxFiles = new ListBox();
             pictureBox = new PictureBox();
             buttonRotate = new Button();
             btnSave = new Button();
+            textBoxFileContent = new RichTextBox();
+            labelAccessTime = new Label();
+            accessTimer = new System.Windows.Forms.Timer(components);
             ((System.ComponentModel.ISupportInitialize)pictureBox).BeginInit();
             SuspendLayout();
             // 
@@ -39,19 +43,19 @@
             // 
             listBoxFiles.Font = new Font("SimSun", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
             listBoxFiles.FormattingEnabled = true;
-            listBoxFiles.ItemHeight = 18;
+            listBoxFiles.ItemHeight = 14;
             listBoxFiles.Location = new Point(24, 31);
             listBoxFiles.Name = "listBoxFiles";
-            listBoxFiles.Size = new Size(295, 274);
+            listBoxFiles.Size = new Size(295, 270);
             listBoxFiles.TabIndex = 0;
             listBoxFiles.SelectedIndexChanged += listBoxFiles_SelectedIndexChanged;
             // 
             // pictureBox
             // 
             pictureBox.BackColor = Color.Transparent;
-            pictureBox.Location = new Point(331, 31);
+            pictureBox.Location = new Point(325, 31);
             pictureBox.Name = "pictureBox";
-            pictureBox.Size = new Size(422, 274);
+            pictureBox.Size = new Size(428, 274);
             pictureBox.TabIndex = 1;
             pictureBox.TabStop = false;
             // 
@@ -77,11 +81,34 @@
             btnSave.UseVisualStyleBackColor = true;
             btnSave.Click += btnSave_Click;
             // 
+            // textBoxFileContent
+            // 
+            textBoxFileContent.Location = new Point(325, 31);
+            textBoxFileContent.Name = "textBoxFileContent";
+            textBoxFileContent.ReadOnly = true;
+            textBoxFileContent.Size = new Size(428, 274);
+            textBoxFileContent.TabIndex = 4;
+            textBoxFileContent.Text = "";
+            // 
+            // labelAccessTime
+            // 
+            labelAccessTime.AutoSize = true;
+            labelAccessTime.Location = new Point(33, 362);
+            labelAccessTime.Name = "labelAccessTime";
+            labelAccessTime.Size = new Size(0, 15);
+            labelAccessTime.TabIndex = 5;
+            // 
+            // accessTimer
+            // 
+            accessTimer.Interval = 1000;
+            // 
             // FileManager
             // 
-            AutoScaleDimensions = new SizeF(9F, 18F);
+            AutoScaleDimensions = new SizeF(7F, 14F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(777, 405);
+            Controls.Add(labelAccessTime);
+            Controls.Add(textBoxFileContent);
             Controls.Add(btnSave);
             Controls.Add(buttonRotate);
             Controls.Add(pictureBox);
@@ -92,6 +119,7 @@
             Load += FileManager_Load;
             ((System.ComponentModel.ISupportInitialize)pictureBox).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -100,5 +128,8 @@
         private PictureBox pictureBox;
         private Button buttonRotate;
         private Button btnSave;
+        private RichTextBox textBoxFileContent;
+        private Label labelAccessTime;
+        private System.Windows.Forms.Timer accessTimer;
     }
 }
