@@ -1,6 +1,6 @@
 ﻿namespace TBD_Yaroshenko
 {
-    partial class MainWind
+    partial class MainWind_RoleBased
     {
         /// <summary>
         /// Required designer variable.
@@ -28,9 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            button_FileManager = new Button();
-            button_Settings = new Button();
-            button_LogOut = new Button();
             SettingMenu = new GroupBox();
             button_SaveFileLevel = new Button();
             button_SaveUserLevel = new Button();
@@ -40,38 +37,11 @@
             label1 = new Label();
             comboBox_Files = new ComboBox();
             comboBox_Users = new ComboBox();
+            button_LogOut = new Button();
+            button_Settings = new Button();
+            button_FileManager = new Button();
             SettingMenu.SuspendLayout();
             SuspendLayout();
-            // 
-            // button_FileManager
-            // 
-            button_FileManager.Location = new Point(23, 30);
-            button_FileManager.Name = "button_FileManager";
-            button_FileManager.Size = new Size(137, 23);
-            button_FileManager.TabIndex = 0;
-            button_FileManager.Text = "FileManager";
-            button_FileManager.UseVisualStyleBackColor = true;
-            button_FileManager.Click += buttonFileManager_Click;
-            // 
-            // button_Settings
-            // 
-            button_Settings.Location = new Point(25, 74);
-            button_Settings.Name = "button_Settings";
-            button_Settings.Size = new Size(135, 23);
-            button_Settings.TabIndex = 1;
-            button_Settings.Text = "Settings";
-            button_Settings.UseVisualStyleBackColor = true;
-            button_Settings.Click += button_Settings_Click;
-            // 
-            // button_LogOut
-            // 
-            button_LogOut.Location = new Point(46, 396);
-            button_LogOut.Name = "button_LogOut";
-            button_LogOut.Size = new Size(125, 23);
-            button_LogOut.TabIndex = 2;
-            button_LogOut.Text = "LogOut";
-            button_LogOut.UseVisualStyleBackColor = true;
-            button_LogOut.Click += button_LogOut_Click;
             // 
             // SettingMenu
             // 
@@ -83,10 +53,10 @@
             SettingMenu.Controls.Add(label1);
             SettingMenu.Controls.Add(comboBox_Files);
             SettingMenu.Controls.Add(comboBox_Users);
-            SettingMenu.Location = new Point(281, 30);
+            SettingMenu.Location = new Point(286, 28);
             SettingMenu.Name = "SettingMenu";
             SettingMenu.Size = new Size(469, 192);
-            SettingMenu.TabIndex = 3;
+            SettingMenu.TabIndex = 11;
             SettingMenu.TabStop = false;
             // 
             // button_SaveFileLevel
@@ -97,7 +67,6 @@
             button_SaveFileLevel.TabIndex = 11;
             button_SaveFileLevel.Text = "Save";
             button_SaveFileLevel.UseVisualStyleBackColor = true;
-            button_SaveFileLevel.Click += button_SaveFileLevel_Click_1;
             // 
             // button_SaveUserLevel
             // 
@@ -107,7 +76,6 @@
             button_SaveUserLevel.TabIndex = 10;
             button_SaveUserLevel.Text = "Save";
             button_SaveUserLevel.UseVisualStyleBackColor = true;
-            button_SaveUserLevel.Click += button_SaveUserLevel_Click_1;
             // 
             // comboBox_NewFileLevel
             // 
@@ -124,7 +92,6 @@
             comboBox_NewUserLevel.Name = "comboBox_NewUserLevel";
             comboBox_NewUserLevel.Size = new Size(186, 23);
             comboBox_NewUserLevel.TabIndex = 8;
-            comboBox_NewUserLevel.SelectedIndexChanged += comboBox_NewUserLevel_SelectedIndexChanged;
             // 
             // label2
             // 
@@ -160,7 +127,34 @@
             comboBox_Users.Size = new Size(126, 23);
             comboBox_Users.TabIndex = 4;
             // 
-            // MainWind
+            // button_LogOut
+            // 
+            button_LogOut.Location = new Point(51, 394);
+            button_LogOut.Name = "button_LogOut";
+            button_LogOut.Size = new Size(125, 23);
+            button_LogOut.TabIndex = 10;
+            button_LogOut.Text = "LogOut";
+            button_LogOut.UseVisualStyleBackColor = true;
+            // 
+            // button_Settings
+            // 
+            button_Settings.Location = new Point(30, 72);
+            button_Settings.Name = "button_Settings";
+            button_Settings.Size = new Size(135, 23);
+            button_Settings.TabIndex = 9;
+            button_Settings.Text = "Settings";
+            button_Settings.UseVisualStyleBackColor = true;
+            // 
+            // button_FileManager
+            // 
+            button_FileManager.Location = new Point(28, 28);
+            button_FileManager.Name = "button_FileManager";
+            button_FileManager.Size = new Size(137, 23);
+            button_FileManager.TabIndex = 8;
+            button_FileManager.Text = "FileManager";
+            button_FileManager.UseVisualStyleBackColor = true;
+            // 
+            // MainWind_RoleBased
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -169,9 +163,8 @@
             Controls.Add(button_LogOut);
             Controls.Add(button_Settings);
             Controls.Add(button_FileManager);
-            Name = "MainWind";
-            Text = "MainWind_Mandatory";
-            Load += MainWind_Load;
+            Name = "MainWind_RoleBased";
+            Text = "MainWind_RoleBased";
             SettingMenu.ResumeLayout(false);
             SettingMenu.PerformLayout();
             ResumeLayout(false);
@@ -179,17 +172,17 @@
 
         #endregion
 
-        private Button button_FileManager;
-        private Button button_Settings;
-        private Button button_LogOut;
         private GroupBox SettingMenu;
-        private ComboBox comboBox_Files;
-        private ComboBox comboBox_Users;
-        private Label label2;
-        private Label label1;
-        private ComboBox comboBox_NewFileLevel;
-        private ComboBox comboBox_NewUserLevel;
         private Button button_SaveFileLevel;
         private Button button_SaveUserLevel;
+        private ComboBox comboBox_NewFileLevel;
+        private ComboBox comboBox_NewUserLevel;
+        private Label label2;
+        private Label label1;
+        private ComboBox comboBox_Files;
+        private ComboBox comboBox_Users;
+        private Button button_LogOut;
+        private Button button_Settings;
+        private Button button_FileManager;
     }
 }

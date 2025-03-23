@@ -43,10 +43,14 @@
             checkBox2 = new CheckBox();
             button3 = new Button();
             checkBox1 = new CheckBox();
+            panel1 = new Panel();
+            label3 = new Label();
+            comboBoxAccessControl = new ComboBox();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)errorProvider2).BeginInit();
             groupBox1.SuspendLayout();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
@@ -57,7 +61,7 @@
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Padding = new Padding(5, 2, 0, 2);
-            menuStrip1.Size = new Size(452, 24);
+            menuStrip1.Size = new Size(328, 24);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -195,12 +199,39 @@
             checkBox1.UseVisualStyleBackColor = true;
             checkBox1.CheckedChanged += checkBox1_CheckedChanged;
             // 
+            // panel1
+            // 
+            panel1.Controls.Add(label3);
+            panel1.Controls.Add(comboBoxAccessControl);
+            panel1.Location = new Point(10, 266);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(302, 91);
+            panel1.TabIndex = 4;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(17, 17);
+            label3.Name = "label3";
+            label3.Size = new Size(229, 15);
+            label3.TabIndex = 3;
+            label3.Text = "Please select the type of access restriction:";
+            // 
+            // comboBoxAccessControl
+            // 
+            comboBoxAccessControl.FormattingEnabled = true;
+            comboBoxAccessControl.Location = new Point(39, 49);
+            comboBoxAccessControl.Name = "comboBoxAccessControl";
+            comboBoxAccessControl.Size = new Size(177, 23);
+            comboBoxAccessControl.TabIndex = 2;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ButtonFace;
-            ClientSize = new Size(452, 292);
+            ClientSize = new Size(328, 369);
+            Controls.Add(panel1);
             Controls.Add(groupBox1);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
@@ -214,6 +245,8 @@
             ((System.ComponentModel.ISupportInitialize)errorProvider2).EndInit();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -234,5 +267,8 @@
         private CheckBox checkBox2;
         private Button button3;
         private Button button2;
+        private Panel panel1;
+        private Label label3;
+        private ComboBox comboBoxAccessControl;
     }
 }

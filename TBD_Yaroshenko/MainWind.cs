@@ -4,6 +4,7 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Security.AccessControl;
 
 namespace TBD_Yaroshenko
 {
@@ -12,6 +13,7 @@ namespace TBD_Yaroshenko
         private string complexPattern = "(?=^.{10,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$";
         private string _username; // Додаємо приватну змінну для зберігання імені користувача
         private string _securityLevel; // Додаємо змінну для зберігання рівня доступу
+        private string accessControlType;
         private string cs = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString;
 
         public MainWind()
@@ -83,8 +85,8 @@ namespace TBD_Yaroshenko
             }
 
             // Відкриваємо форму FileManager і передаємо ім'я користувача
-            FileManager fileManagerForm = new FileManager(_username);
-            fileManagerForm.Show(); // Показуємо форму FileManager
+            FileManager fileManager = new FileManager(_username, accessControlType);
+            fileManager.Show();
         }
 
         private void button_Settings_Click(object sender, EventArgs e)
@@ -225,19 +227,10 @@ namespace TBD_Yaroshenko
                 if (password.Length <= 10)
                 {
                     MessageBox.Show("Для встановлення цього рівня доступу пароль повинен бути довшим за 10 символів.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return; 
+                    return;
                 }
 
-                // Перевіряємо складність паролю за допомогою регулярного виразу
-                //if (!Regex.IsMatch(password, complexPattern))
-                //{
-                //    MessageBox.Show("Пароль не відповідає вимогам складності. Пароль повинен містити:\n" +
-                //                    "- Мінімум 10 символів\n" +
-                //                    "- Принаймні одну велику літеру (A-Z)\n" +
-                //                    "- Принаймні одну малу літеру (a-z)\n" +
-                //                    "- Принаймні одну цифру (0-9) або спеціальний символ", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //    return; 
-                //}
+        
             }
 
             try
@@ -335,5 +328,7 @@ namespace TBD_Yaroshenko
         {
 
         }
+
+       
     }
 }
