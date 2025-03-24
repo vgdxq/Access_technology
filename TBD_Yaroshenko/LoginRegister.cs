@@ -9,26 +9,30 @@ namespace TBD_Yaroshenko
 {
     public partial class Form1 : Form
     {
-        private string cs = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString;
-        private string complexPattern = "(?=^.{8,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$";
+        private string cs = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString; // Рядок підключення до БД
+        private string complexPattern = "(?=^.{8,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$"; // Патерн складності паролю
 
         public Form1()
         {
             InitializeComponent();
+            // Додаємо варіанти контролю доступу у комбобокс
             comboBoxAccessControl.Items.AddRange(new string[] { "Mandatory", "Discretionary", "Role-Based" });
-            comboBoxAccessControl.SelectedIndex = 0; // Значення за замовчуванням
+            comboBoxAccessControl.SelectedIndex = 0; // Встановлюємо значення за замовчуванням
         }
 
+        // Обробник кнопки довідки
         private void довідкаToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Performed by: Yaroshenko Iryna, group B-125-21-3-B");
         }
 
+        // Метод для визначення складності паролю
         private string GetPasswordComplexity(string password)
         {
             return Regex.IsMatch(password, complexPattern) ? "High" : "Low";
         }
 
+        // Метод для збереження історії паролів
         private void SavePasswordHistory(string username, string password)
         {
             try
@@ -45,14 +49,15 @@ namespace TBD_Yaroshenko
             }
             catch (SqlException ex)
             {
-                MessageBox.Show($"Помилка бази даних: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // Метод для перевірки чи пароль був використаний раніше
         private bool IsPasswordInHistory(string username, string password)
         {
             try
@@ -69,21 +74,23 @@ namespace TBD_Yaroshenko
             }
             catch (SqlException ex)
             {
-                MessageBox.Show($"Помилка бази даних: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
 
+        // Обробник зміни стану чекбоксу для показу паролю
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             textBox2.UseSystemPasswordChar = !checkBox1.Checked;
         }
 
+        // Обробник зміни стану чекбоксу для перевірки складності паролю
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBox2.Checked && !Regex.IsMatch(textBox2.Text, complexPattern))
@@ -92,51 +99,7 @@ namespace TBD_Yaroshenko
             }
         }
 
-        //private void button1_Click_1(object sender, EventArgs e)
-        //{
-        //    //if (string.IsNullOrWhiteSpace(textBox1.Text) || string.IsNullOrWhiteSpace(textBox2.Text))
-        //    //{
-        //    //    MessageBox.Show("Fill in all fields for authorization", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        //    //    return;
-        //    //}
-
-        //    //try
-        //    //{
-        //    //    using (var con = new SqlConnection(cs))
-        //    //    using (var cmd = new SqlCommand("SELECT * FROM LOGIN_TBL WHERE USERNAME = @user AND PASS = @pass", con))
-        //    //    {
-        //    //        cmd.Parameters.Add(new SqlParameter("@user", SqlDbType.VarChar, 50)).Value = textBox1.Text;
-        //    //        cmd.Parameters.Add(new SqlParameter("@pass", SqlDbType.VarChar, 100)).Value = textBox2.Text;
-        //    //        con.Open();
-        //    //        using (var dr = cmd.ExecuteReader())
-        //    //        {
-        //    //            if (dr.HasRows)
-        //    //            {
-        //    //                dr.Read();
-        //    //                string role = dr["SECURITY_LEVEL"]?.ToString() ?? "Unclassified";
-        //    //                MessageBox.Show($"Login successful! Security Level: {role}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-        //    //                // Відкриваємо MainWind і передаємо ім'я користувача
-        //    //                MainWind mainWind = new MainWind(textBox1.Text);
-        //    //                mainWind.Show();
-        //    //                this.Hide();
-        //    //            }
-        //    //            else
-        //    //            {
-        //    //                MessageBox.Show("Authorization error. Incorrect login or password.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //    //            }
-        //    //        }
-        //    //    }
-        //    //}
-        //    catch (SqlException ex)
-        //    {
-        //        MessageBox.Show($"Помилка бази даних: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //    }
-        //}
+        // Обробник кнопки входу
         private void button1_Click_1(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text) || string.IsNullOrWhiteSpace(textBox2.Text))
@@ -145,7 +108,7 @@ namespace TBD_Yaroshenko
                 return;
             }
 
-            // Отримуємо вибраний тип розмежування з comboBoxAccessControl
+            // Отримуємо вибраний тип контролю доступу
             string accessControlType = comboBoxAccessControl.SelectedItem?.ToString() ?? "Undefined";
 
             using (var con = new SqlConnection(cs))
@@ -164,8 +127,8 @@ namespace TBD_Yaroshenko
                     dr.Read();
                     string role = dr["SECURITY_LEVEL"]?.ToString() ?? "Unclassified";
 
-                    // Оновлення типу розмежування в базі даних
-                    dr.Close(); // Закриваємо DataReader перед виконанням наступного запиту
+                    // Оновлення типу контролю доступу в БД
+                    dr.Close();
                     string updateQuery = "UPDATE LOGIN_TBL SET ACCESS_CONTROL_TYPE = @accessControlType WHERE USERNAME = @user";
                     var updateCmd = new SqlCommand(updateQuery, con);
                     updateCmd.Parameters.AddWithValue("@accessControlType", accessControlType);
@@ -174,24 +137,24 @@ namespace TBD_Yaroshenko
 
                     MessageBox.Show($"Login successful! Security Level: {role}, Access Control Type: {accessControlType}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    // Відкриваємо відповідну форму залежно від типу контролю доступу
+                    // Відкриття відповідної форми залежно від типу контролю доступу
                     if (accessControlType == "Discretionary")
                     {
-                        MainWind_Discretionary mainWindDiscretionary = new MainWind_Discretionary(textBox1.Text, accessControlType); // Передаємо ім'я користувача
+                        MainWind_Discretionary mainWindDiscretionary = new MainWind_Discretionary(textBox1.Text, accessControlType);
                         mainWindDiscretionary.Show();
                     }
                     else if (accessControlType == "Role-Based")
                     {
-                        MainWind_RoleBased mainWindRoleBased = new MainWind_RoleBased(textBox1.Text); // Передаємо ім'я користувача
+                        MainWind_RoleBased mainWindRoleBased = new MainWind_RoleBased(textBox1.Text);
                         mainWindRoleBased.Show();
                     }
                     else
                     {
-                        MainWind mainWind = new MainWind(textBox1.Text); // Стандартна форма для Mandatory
+                        MainWind mainWind = new MainWind(textBox1.Text);
                         mainWind.Show();
                     }
 
-                    this.Hide(); // Приховуємо поточну форму (Form1)
+                    this.Hide();
                 }
                 else
                 {
@@ -200,6 +163,7 @@ namespace TBD_Yaroshenko
             }
         }
 
+        // Обробник кнопки реєстрації
         private void button2_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text) || string.IsNullOrWhiteSpace(textBox2.Text))
@@ -227,7 +191,7 @@ namespace TBD_Yaroshenko
                         return;
                     }
 
-                    // Отримуємо вибраний тип розмежування з comboBoxAccessControl
+                    // Отримуємо вибраний тип контролю доступу
                     string accessControlType = comboBoxAccessControl.SelectedItem?.ToString() ?? "Undefined";
 
                     using (var insertCmd = new SqlCommand(
@@ -245,14 +209,15 @@ namespace TBD_Yaroshenko
             }
             catch (SqlException ex)
             {
-                MessageBox.Show($"Помилка бази даних: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // Обробник кнопки зміни паролю
         private void button3_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text) || string.IsNullOrWhiteSpace(textBox2.Text))
@@ -294,19 +259,17 @@ namespace TBD_Yaroshenko
             }
             catch (SqlException ex)
             {
-                MessageBox.Show($"Помилка бази даних: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            // Обробник завантаження форми
         }
-
-       
     }
 }

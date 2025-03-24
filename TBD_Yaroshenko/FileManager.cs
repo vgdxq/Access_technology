@@ -13,26 +13,30 @@ namespace TBD_Yaroshenko
 {
     public partial class FileManager : Form
     {
-        private string currentFilePath = string.Empty;
-        private Bitmap currentImage;
-        private string cs = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString;
-        private string userSecurityLevel;
-        private string accessControlType;
-        private string _username;
+        private string currentFilePath = string.Empty; // Поточний шлях до файлу
+        private Bitmap currentImage; // Поточне зображення для перегляду
+        private string cs = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString; // Рядок підключення до БД
+        private string userSecurityLevel; // Рівень безпеки користувача
+        private string accessControlType; // Тип контролю доступу
+        private string _username; // Ім'я поточного користувача
         private DateTime? accessStartTime = null; // Час початку доступу
         private int? accessDurationSeconds = null; // Тривалість доступу в секундах
-        private Dictionary<string, FileAccessInfo> _fileAccessDict = new Dictionary<string, FileAccessInfo>();
-        private HashSet<string> blockedFiles = new HashSet<string>();
+        private Dictionary<string, FileAccessInfo> _fileAccessDict = new Dictionary<string, FileAccessInfo>(); // Словник для зберігання інформації про доступ
+        private Dictionary<string, Process> _runningProcesses = new Dictionary<string, Process>(); // Словник для відстеження запущених процесів
+        private HashSet<string> blockedFiles = new HashSet<string>(); // Множина заблокованих файлів
 
         public FileManager(string username, string accessControlType)
         {
             InitializeComponent();
+            this.FormClosing += FileManager_FormClosing;
+
+            // Приховуємо елементи інтерфейсу на початку
             buttonRotate.Visible = false;
             btnSave.Visible = false;
             pictureBox.Visible = false;
             textBoxFileContent.Visible = false;
-         
 
+            // Налаштування таймера для контролю часу доступу
             accessTimer.Interval = 1000;
             accessTimer.Tick += AccessTimer_Tick;
             accessTimer.Start();
@@ -46,7 +50,15 @@ namespace TBD_Yaroshenko
             _username = username;
             this.accessControlType = accessControlType;
 
-            // Отримуємо рівень конфіденційності користувача з бази даних
+            // Налаштування інтерфейсу в залежності від типу контролю доступу
+            labelAccessTime.Visible = (accessControlType != "Mandatory");
+
+            if (accessControlType != "Mandatory")
+            {
+                accessTimer.Start();
+            }
+
+            // Отримання рівня конфіденційності користувача з БД
             try
             {
                 using (SqlConnection con = new SqlConnection(cs))
@@ -70,11 +82,11 @@ namespace TBD_Yaroshenko
                 MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            // Синхронізуємо файли з базою даних
+            // Синхронізація файлів з базою даних
             string folderPath = @"C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\Data";
             SyncFilesWithDatabase(folderPath);
 
-            // Перевіряємо доступні файли для користувача
+            // Перевірка доступу для дискреційного контролю
             if (accessControlType == "Discretionary" && !CheckUserHasAccess())
             {
                 MessageBox.Show("No one has given you access to the files yet. Contact the resource owners.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -83,11 +95,32 @@ namespace TBD_Yaroshenko
             }
         }
 
+        // Обробник закриття форми
+        private void FileManager_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Звільнення ресурсів
+            if (currentImage != null)
+            {
+                currentImage.Dispose();
+                currentImage = null;
+            }
+
+            // Зупинка таймера
+            if (accessTimer != null)
+            {
+                accessTimer.Stop();
+                accessTimer.Dispose();
+            }
+        }
+
+        // Обробник події таймера для контролю часу доступу
         private void AccessTimer_Tick(object sender, EventArgs e)
         {
-            if (accessControlType != "Discretionary" || !accessStartTime.HasValue)
+            if (accessControlType == "Mandatory") return;
+
+            if (!accessStartTime.HasValue || !accessDurationSeconds.HasValue)
             {
-                labelAccessTime.Text = "Доступ: необмежений";
+                labelAccessTime.Text = "Access: unlimited";
                 return;
             }
 
@@ -96,18 +129,17 @@ namespace TBD_Yaroshenko
 
             if (remaining > 0)
             {
-                labelAccessTime.Text = $"Залишилось: {remaining} сек.";
+                labelAccessTime.Text = $"Time left: {remaining} sec.";
             }
             else
             {
                 accessTimer.Stop();
-                labelAccessTime.Text = "Доступ закрито!";
-                MessageBox.Show("Час вичерпано для поточного файлу", "Увага", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                labelAccessTime.Text = "Access closed!";
 
-                // Приховуємо вміст файлу
+                CloseRunningProcesses();
+                MessageBox.Show("Time expired for current file", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 HideFileContent();
 
-                // Додаємо файл до списку заблокованих
                 if (!string.IsNullOrEmpty(currentFilePath))
                 {
                     string fileName = Path.GetFileName(currentFilePath);
@@ -116,10 +148,73 @@ namespace TBD_Yaroshenko
             }
         }
 
+        // Метод для закриття запущених процесів
+        private void CloseRunningProcesses()
+        {
+            var processesToClose = _runningProcesses.Values.ToList();
+
+            foreach (var process in processesToClose)
+            {
+                try
+                {
+                    if (process != null && !process.HasExited)
+                    {
+                        bool closedGracefully = false;
+                        var notepadProcesses = Process.GetProcessesByName("notepad++");
+                        foreach (Process p in notepadProcesses)
+                        {
+                            try
+                            {
+                                if (p.Id == process.Id)
+                                {
+                                    closedGracefully = p.CloseMainWindow();
+                                    if (!p.WaitForExit(2000))
+                                    {
+                                        p.Kill();
+                                    }
+                                    break;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error closing process {p.Id}: {ex.Message}");
+                            }
+                        }
+
+                        if (!closedGracefully && !process.HasExited)
+                        {
+                            process.Kill();
+                        }
+                    }
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Debug.WriteLine($"Process already finished: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error closing process: {ex.Message}");
+                }
+                finally
+                {
+                    try
+                    {
+                        process?.Dispose();
+                    }
+                    catch { }
+                }
+            }
+
+            _runningProcesses.Clear();
+        }
+
+        // Перевірка наявності доступу до файлів
         private bool CheckUserHasAccess()
         {
             var accessibleFiles = new List<string>();
-            string query = "SELECT FILE_NAME FROM USER_FILE_ACCESS WHERE USERNAME = @username AND CAN_READ = 1";
+            string query = @"SELECT FILE_NAME FROM USER_FILE_ACCESS 
+                   WHERE USERNAME = @username 
+                   AND (CAN_READ = 1 OR CAN_EXECUTE = 1)";
 
             using (SqlConnection conn = new SqlConnection(cs))
             using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -137,6 +232,7 @@ namespace TBD_Yaroshenko
             return accessibleFiles.Count > 0;
         }
 
+        // Синхронізація файлів з базою даних
         private void SyncFilesWithDatabase(string folderPath)
         {
             if (!Directory.Exists(folderPath))
@@ -191,6 +287,7 @@ namespace TBD_Yaroshenko
             }
         }
 
+        // Визначення рівня конфіденційності файлу за його ім'ям
         private string DetermineConfidentialityLevel(string fileName)
         {
             if (fileName.Contains("logo")) return "Unclassified";
@@ -201,6 +298,7 @@ namespace TBD_Yaroshenko
             else return "Administrative";
         }
 
+        // Завантаження файлів для мандатного контролю доступу
         private void LoadFilesMandatory(string folderPath)
         {
             if (Directory.Exists(folderPath))
@@ -241,6 +339,7 @@ namespace TBD_Yaroshenko
 
         private bool isLoading = false;
 
+        // Завантаження файлів для дискреційного контролю доступу
         private void LoadFilesDiscretionary(string folderPath)
         {
             if (isLoading) return;
@@ -248,23 +347,14 @@ namespace TBD_Yaroshenko
 
             listBoxFiles.Items.Clear();
             var accessibleFiles = new List<string>();
-            string query = @"
-        SELECT FILE_NAME 
-        FROM USER_FILE_ACCESS 
-        WHERE USERNAME = @username 
-        AND (
-            ( -- Для .exe та .lnk перевіряємо CAN_EXECUTE
-                (FILE_NAME LIKE '%.exe' OR FILE_NAME LIKE '%.lnk') 
-                AND CAN_EXECUTE = 1
-            )
-            OR 
-            ( -- Для інших файлів перевіряємо CAN_READ
-                FILE_NAME NOT LIKE '%.exe' 
-                AND FILE_NAME NOT LIKE '%.lnk' 
-                AND CAN_READ = 1
-            )
-        )";
-
+            string query = @"SELECT FILE_NAME 
+                FROM USER_FILE_ACCESS 
+                WHERE USERNAME = @username 
+                AND (
+                    (FILE_NAME LIKE '%.exe' OR FILE_NAME LIKE '%.lnk') AND CAN_EXECUTE = 1
+                    OR 
+                    (NOT (FILE_NAME LIKE '%.exe' OR FILE_NAME LIKE '%.lnk') AND CAN_READ = 1)
+                )";
 
             using (SqlConnection conn = new SqlConnection(cs))
             using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -293,6 +383,7 @@ namespace TBD_Yaroshenko
             isLoading = false;
         }
 
+        // Перевірка дозволу доступу за рівнем конфіденційності
         private bool IsAccessAllowed(string fileConfidentialityLevel)
         {
             var securityLevels = new List<string> { "Top Secret", "Secret", "Confidential", "FOUO", "Unclassified" };
@@ -301,6 +392,7 @@ namespace TBD_Yaroshenko
             return userLevelIndex <= fileLevelIndex;
         }
 
+        // Обробник завантаження форми
         private void FileManager_Load(object sender, EventArgs e)
         {
             string folderPath = @"C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\Data";
@@ -318,6 +410,7 @@ namespace TBD_Yaroshenko
             }
         }
 
+        // Обробник вибору файлу у списку
         private void listBoxFiles_SelectedIndexChanged(object sender, EventArgs e)
         {
             accessTimer.Stop();
@@ -327,19 +420,21 @@ namespace TBD_Yaroshenko
             string selectedFile = listBoxFiles.SelectedItem.ToString();
             if (blockedFiles.Contains(selectedFile))
             {
-                MessageBox.Show("Доступ до цього файлу вичерпано", "Увага", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Access to this file has expired", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 listBoxFiles.SelectedIndex = -1;
                 return;
             }
 
             string folderPath = @"C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\Data";
             currentFilePath = Path.Combine(folderPath, selectedFile);
+            string fileExtension = Path.GetExtension(currentFilePath).ToLower();
+            bool isExecutable = fileExtension == ".exe" || fileExtension == ".lnk";
 
             if (accessControlType == "Discretionary")
             {
                 if (!GetAccessDuration(selectedFile))
                 {
-                    MessageBox.Show("Доступ заборонено", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Access denied", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -350,13 +445,16 @@ namespace TBD_Yaroshenko
                 }
                 else
                 {
-                    labelAccessTime.Text = "Доступ: необмежений";
+                    labelAccessTime.Text = "Access: unlimited";
                 }
 
                 using (SqlConnection con = new SqlConnection(cs))
                 {
                     con.Open();
-                    string query = "SELECT CAN_READ, CAN_WRITE FROM USER_FILE_ACCESS WHERE USERNAME=@user AND FILE_NAME=@file";
+                    string query = isExecutable
+                        ? "SELECT CAN_EXECUTE, CAN_WRITE FROM USER_FILE_ACCESS WHERE USERNAME=@user AND FILE_NAME=@file"
+                        : "SELECT CAN_READ, CAN_WRITE FROM USER_FILE_ACCESS WHERE USERNAME=@user AND FILE_NAME=@file";
+
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@user", _username);
@@ -366,9 +464,19 @@ namespace TBD_Yaroshenko
                         {
                             if (reader.Read())
                             {
-                                bool canRead = reader.GetBoolean(0);
+                                bool hasAccess = isExecutable
+                                    ? reader.GetBoolean(0)
+                                    : reader.GetBoolean(0);
                                 bool canWrite = reader.GetBoolean(1);
-                                if (canRead) OpenFile(canWrite);
+
+                                if (hasAccess)
+                                {
+                                    OpenFile(canWrite, isExecutable);
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Access denied", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
                             }
                         }
                     }
@@ -376,16 +484,17 @@ namespace TBD_Yaroshenko
             }
             else
             {
-                OpenFile(true);
+                OpenFile(true, isExecutable);
             }
         }
 
-        private void OpenFile(bool canWrite)
+        // Відкриття файлу
+        private void OpenFile(bool canWrite, bool isExecutable)
         {
             string fileName = Path.GetFileName(currentFilePath);
             if (blockedFiles.Contains(fileName))
             {
-                MessageBox.Show("Доступ до цього файлу вичерпано", "Увага", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Access to this file has expired", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -398,7 +507,7 @@ namespace TBD_Yaroshenko
                     if (elapsed.TotalSeconds > accessInfo.DurationSeconds)
                     {
                         accessInfo.IsExpired = true;
-                        MessageBox.Show("Час доступу вичерпано", "Увага", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show("Access time expired", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         HideFileContent();
                         return;
                     }
@@ -409,7 +518,7 @@ namespace TBD_Yaroshenko
             {
                 string fileExtension = Path.GetExtension(currentFilePath).ToLower();
 
-                // Сховати всі елементи інтерфейсу перед відображенням нового вмісту
+                // Сховати всі елементи інтерфейсу
                 textBoxFileContent.Visible = false;
                 pictureBox.Visible = false;
                 buttonRotate.Visible = false;
@@ -420,15 +529,8 @@ namespace TBD_Yaroshenko
                     case ".txt":
                         textBoxFileContent.Text = File.ReadAllText(currentFilePath);
                         textBoxFileContent.Visible = true;
-                        if (canWrite)
-                        {
-                            textBoxFileContent.ReadOnly = false; // Дозволяємо редагування
-                            btnSave.Visible = true; // Показуємо кнопку збереження
-                        }
-                        else
-                        {
-                            textBoxFileContent.ReadOnly = true; // Лише для читання
-                        }
+                        textBoxFileContent.ReadOnly = !canWrite;
+                        btnSave.Visible = canWrite;
                         break;
 
                     case ".png":
@@ -443,12 +545,32 @@ namespace TBD_Yaroshenko
                         }
                         pictureBox.Image = currentImage;
                         pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
-                        buttonRotate.Visible = true;
+                        buttonRotate.Visible = canWrite;
                         btnSave.Visible = canWrite;
                         break;
 
                     case ".exe":
-                        Process.Start(currentFilePath);
+                    case ".lnk":
+                        if (isExecutable)
+                        {
+                            try
+                            {
+                                var startInfo = new ProcessStartInfo
+                                {
+                                    FileName = currentFilePath,
+                                    UseShellExecute = true,
+                                    Verb = "open"
+                                };
+
+                                var process = Process.Start(startInfo);
+                                _runningProcesses[fileName] = process;
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Failed to open shortcut: {ex.Message}", "Error",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
                         break;
 
                     default:
@@ -458,10 +580,11 @@ namespace TBD_Yaroshenko
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка відкриття файлу: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error opening file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // Приховування вмісту файлу
         private void HideFileContent()
         {
             textBoxFileContent.Visible = false;
@@ -470,6 +593,7 @@ namespace TBD_Yaroshenko
             btnSave.Visible = false;
         }
 
+        // Отримання тривалості доступу до файлу
         private bool GetAccessDuration(string fileName)
         {
             using (SqlConnection con = new SqlConnection(cs))
@@ -484,15 +608,17 @@ namespace TBD_Yaroshenko
                     var result = cmd.ExecuteScalar();
                     if (result != null)
                     {
-                        accessDurationSeconds = (result == DBNull.Value) ? null : Convert.ToInt32(result);
-                        if (accessDurationSeconds.HasValue) _fileAccessDict[fileName] = new FileAccessInfo { AccessStartTime = DateTime.Now, DurationSeconds = accessDurationSeconds.Value };
+                        int duration = (result == DBNull.Value) ? 0 : Convert.ToInt32(result);
+                        accessDurationSeconds = duration == 0 ? null : duration;
+                        if (accessDurationSeconds.HasValue)
+                            _fileAccessDict[fileName] = new FileAccessInfo { AccessStartTime = DateTime.Now, DurationSeconds = accessDurationSeconds.Value };
                         return true;
                     }
                     return false;
                 }
             }
         }
-
+        // Обробник кнопки обертання зображення
         private void buttonRotate_Click(object sender, EventArgs e)
         {
             if (currentImage != null)
@@ -503,6 +629,7 @@ namespace TBD_Yaroshenko
             }
         }
 
+        // Обробник кнопки збереження змін
         private void btnSave_Click(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(currentFilePath))
@@ -513,25 +640,26 @@ namespace TBD_Yaroshenko
                     if (fileExtension == ".txt")
                     {
                         File.WriteAllText(currentFilePath, textBoxFileContent.Text);
-                        MessageBox.Show("Зміни збережено!", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Changes saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else if (currentImage != null && fileExtension is ".png" or ".jpg" or ".jpeg" or ".gif")
                     {
                         currentImage.Save(currentFilePath, System.Drawing.Imaging.ImageFormat.Png);
-                        MessageBox.Show("Зміни збережено!", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Changes saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Не вдалося зберегти зміни: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Failed to save changes: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
-                MessageBox.Show("Немає змін для збереження або файл не вибрано.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("No changes to save or file not selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // Клас для зберігання інформації про доступ до файлу
         public class FileAccessInfo
         {
             public DateTime AccessStartTime { get; set; }
