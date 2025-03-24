@@ -28,7 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             SettingMenu = new GroupBox();
+            button_UpdateDuration = new Button();
+            numericUpDown_Duration = new NumericUpDown();
             checkBox_Execute = new CheckBox();
             checkBox_Writing = new CheckBox();
             checkBox_Reading = new CheckBox();
@@ -39,11 +42,15 @@
             comboBox_Users = new ComboBox();
             button_LogOut = new Button();
             button_FileManager = new Button();
+            toolTip1 = new ToolTip(components);
             SettingMenu.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDown_Duration).BeginInit();
             SuspendLayout();
             // 
             // SettingMenu
             // 
+            SettingMenu.Controls.Add(button_UpdateDuration);
+            SettingMenu.Controls.Add(numericUpDown_Duration);
             SettingMenu.Controls.Add(checkBox_Execute);
             SettingMenu.Controls.Add(checkBox_Writing);
             SettingMenu.Controls.Add(checkBox_Reading);
@@ -52,11 +59,30 @@
             SettingMenu.Controls.Add(label1);
             SettingMenu.Controls.Add(comboBox_Files);
             SettingMenu.Controls.Add(comboBox_Users);
-            SettingMenu.Location = new Point(309, 30);
+            SettingMenu.Location = new Point(12, 74);
             SettingMenu.Name = "SettingMenu";
-            SettingMenu.Size = new Size(357, 192);
+            SettingMenu.Size = new Size(357, 214);
             SettingMenu.TabIndex = 7;
             SettingMenu.TabStop = false;
+            // 
+            // button_UpdateDuration
+            // 
+            button_UpdateDuration.Location = new Point(227, 136);
+            button_UpdateDuration.Name = "button_UpdateDuration";
+            button_UpdateDuration.Size = new Size(75, 23);
+            button_UpdateDuration.TabIndex = 15;
+            button_UpdateDuration.Text = "Update";
+            button_UpdateDuration.UseVisualStyleBackColor = true;
+            button_UpdateDuration.Click += Button_UpdateDuration_Click_1;
+            // 
+            // numericUpDown_Duration
+            // 
+            numericUpDown_Duration.Increment = new decimal(new int[] { 60, 0, 0, 0 });
+            numericUpDown_Duration.Location = new Point(70, 136);
+            numericUpDown_Duration.Maximum = new decimal(new int[] { 86400, 0, 0, 0 });
+            numericUpDown_Duration.Name = "numericUpDown_Duration";
+            numericUpDown_Duration.Size = new Size(126, 23);
+            numericUpDown_Duration.TabIndex = 14;
             // 
             // checkBox_Execute
             // 
@@ -90,9 +116,9 @@
             // 
             // button_GrantAccess
             // 
-            button_GrantAccess.Location = new Point(121, 163);
+            button_GrantAccess.Location = new Point(123, 185);
             button_GrantAccess.Name = "button_GrantAccess";
-            button_GrantAccess.Size = new Size(75, 23);
+            button_GrantAccess.Size = new Size(118, 23);
             button_GrantAccess.TabIndex = 10;
             button_GrantAccess.Text = "Save";
             button_GrantAccess.UseVisualStyleBackColor = true;
@@ -100,7 +126,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(15, 102);
+            label2.Location = new Point(15, 100);
             label2.Name = "label2";
             label2.Size = new Size(30, 15);
             label2.TabIndex = 7;
@@ -109,7 +135,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(10, 47);
+            label1.Location = new Point(15, 52);
             label1.Name = "label1";
             label1.Size = new Size(35, 15);
             label1.TabIndex = 6;
@@ -118,10 +144,11 @@
             // comboBox_Files
             // 
             comboBox_Files.FormattingEnabled = true;
-            comboBox_Files.Location = new Point(70, 102);
+            comboBox_Files.Location = new Point(70, 92);
             comboBox_Files.Name = "comboBox_Files";
             comboBox_Files.Size = new Size(126, 23);
             comboBox_Files.TabIndex = 5;
+            comboBox_Files.SelectedIndexChanged += comboBox_Files_SelectedIndexChanged;
             // 
             // comboBox_Users
             // 
@@ -155,7 +182,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(692, 439);
+            ClientSize = new Size(394, 439);
             Controls.Add(SettingMenu);
             Controls.Add(button_LogOut);
             Controls.Add(button_FileManager);
@@ -163,6 +190,7 @@
             Text = "MainWind_Discretionary";
             SettingMenu.ResumeLayout(false);
             SettingMenu.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDown_Duration).EndInit();
             ResumeLayout(false);
         }
 
@@ -179,5 +207,8 @@
         private CheckBox checkBox_Execute;
         private CheckBox checkBox_Writing;
         private CheckBox checkBox_Reading;
+        private NumericUpDown numericUpDown_Duration;
+        private Button button_UpdateDuration;
+        private ToolTip toolTip1;
     }
 }

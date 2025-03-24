@@ -11,10 +11,10 @@ namespace TBD_Yaroshenko
     public partial class MainWind : Form
     {
         private string complexPattern = "(?=^.{10,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$";
-        private string _username; // Додаємо приватну змінну для зберігання імені користувача
-        private string _securityLevel; // Додаємо змінну для зберігання рівня доступу
-        private string accessControlType;
-        private string cs = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString;
+        private string _username; // Ім'я поточного користувача
+        private string _securityLevel; // Рівень безпеки користувача
+        private string accessControlType; // Тип контролю доступу
+        private string cs = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString; // Рядок підключення до БД
 
         public MainWind()
         {
@@ -29,10 +29,10 @@ namespace TBD_Yaroshenko
             // Отримуємо рівень доступу користувача з бази даних
             _securityLevel = GetUserSecurityLevel(_username);
 
-            // Встановлюємо видимість кнопки button_Settings
+            // Встановлюємо видимість кнопки налаштувань (тільки для адміністраторів)
             button_Settings.Visible = (_securityLevel == "Administrative");
 
-            // Приховуємо GroupBox на початку
+            // Приховуємо GroupBox налаштувань на початку
             SettingMenu.Visible = false;
 
             // Заповнюємо ComboBox для рівнів доступу
@@ -65,54 +65,50 @@ namespace TBD_Yaroshenko
             }
             catch (SqlException ex)
             {
-                MessageBox.Show($"Помилка бази даних: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             return securityLevel;
         }
 
+        // Обробник події для кнопки менеджера файлів
         private void buttonFileManager_Click(object sender, EventArgs e)
         {
-            // Перевіряємо, чи ім'я користувача не є порожнім або null
             if (string.IsNullOrEmpty(_username))
             {
-                MessageBox.Show("Ім'я користувача не вказано.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Username not specified.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            // Відкриваємо форму FileManager і передаємо ім'я користувача
             FileManager fileManager = new FileManager(_username, accessControlType);
             fileManager.Show();
         }
 
+        // Обробник події для кнопки налаштувань
         private void button_Settings_Click(object sender, EventArgs e)
         {
-            // Перевіряємо, чи користувач є адміністратором
             if (_securityLevel == "Administrative")
             {
-                // Показуємо GroupBox з налаштуваннями
                 SettingMenu.Visible = true;
-
-                // Завантажуємо користувачів та файли
                 LoadUsers();
                 LoadFiles();
             }
             else
             {
-                MessageBox.Show("Доступ до налаштувань заборонено.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Access to settings is denied.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
-        // Метод для завантаження користувачів у comboBox_Users
+        // Метод для завантаження списку користувачів
         private void LoadUsers()
         {
             try
             {
-                comboBox_Users.Items.Clear(); // Очищаємо список перед завантаженням
+                comboBox_Users.Items.Clear();
 
                 using (SqlConnection con = new SqlConnection(cs))
                 {
@@ -132,20 +128,20 @@ namespace TBD_Yaroshenko
             }
             catch (SqlException ex)
             {
-                MessageBox.Show($"Помилка бази даних: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // Метод для завантаження файлів у comboBox_Files
+        // Метод для завантаження списку файлів
         private void LoadFiles()
         {
             try
             {
-                comboBox_Files.Items.Clear(); // Очищаємо список перед завантаженням
+                comboBox_Files.Items.Clear();
 
                 using (SqlConnection con = new SqlConnection(cs))
                 {
@@ -165,13 +161,15 @@ namespace TBD_Yaroshenko
             }
             catch (SqlException ex)
             {
-                MessageBox.Show($"Помилка бази даних: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        // Метод для отримання паролю користувача
         private string GetUserPassword(string username)
         {
             string password = string.Empty;
@@ -196,41 +194,37 @@ namespace TBD_Yaroshenko
             }
             catch (SqlException ex)
             {
-                MessageBox.Show($"Помилка бази даних: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             return password;
         }
 
+        // Обробник події для збереження нового рівня доступу користувача
         private void button_SaveUserLevel_Click_1(object sender, EventArgs e)
         {
             if (comboBox_Users.SelectedItem == null || comboBox_NewUserLevel.SelectedItem == null)
             {
-                MessageBox.Show("Виберіть користувача та новий рівень доступу.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please select a user and new access level.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             string selectedUser = comboBox_Users.SelectedItem.ToString();
             string newLevel = comboBox_NewUserLevel.SelectedItem.ToString();
 
-            // Перевіряємо, чи новий рівень є "Top Secret" або "Secret"
             if (newLevel == "Top Secret" || newLevel == "Secret")
             {
-                // Отримуємо пароль користувача
                 string password = GetUserPassword(selectedUser);
 
-                // Перевіряємо довжину паролю
                 if (password.Length <= 10)
                 {
-                    MessageBox.Show("Для встановлення цього рівня доступу пароль повинен бути довшим за 10 символів.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Password must be longer than 10 characters for this access level.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-
-        
             }
 
             try
@@ -247,31 +241,31 @@ namespace TBD_Yaroshenko
                         int rowsAffected = cmd.ExecuteNonQuery();
                         if (rowsAffected > 0)
                         {
-                            MessageBox.Show($"Рівень доступу для користувача {selectedUser} успішно оновлено.", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show($"Access level for user {selectedUser} updated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
                         {
-                            MessageBox.Show("Користувача не знайдено.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("User not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                 }
             }
             catch (SqlException ex)
             {
-                MessageBox.Show($"Помилка бази даних: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        // Обробник події для збереження нового CONFIDENTIALITY_LEVEL для файлу
 
+        // Обробник події для збереження нового рівня конфіденційності файлу
         private void button_SaveFileLevel_Click_1(object sender, EventArgs e)
         {
             if (comboBox_Files.SelectedItem == null || comboBox_NewFileLevel.SelectedItem == null)
             {
-                MessageBox.Show("Виберіть файл та новий рівень конфіденційності.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please select a file and new confidentiality level.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -292,43 +286,41 @@ namespace TBD_Yaroshenko
                         int rowsAffected = cmd.ExecuteNonQuery();
                         if (rowsAffected > 0)
                         {
-                            MessageBox.Show($"Рівень конфіденційності для файлу {selectedFile} успішно оновлено.", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show($"Confidentiality level for file {selectedFile} updated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
                         {
-                            MessageBox.Show("Файл не знайдено.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("File not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                 }
             }
             catch (SqlException ex)
             {
-                MessageBox.Show($"Помилка бази даних: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // Обробник події для виходу з системи
         private void button_LogOut_Click(object sender, EventArgs e)
         {
-            // Повертаємося до форми авторизації (Form1)
             Form1 loginForm = new Form1();
-            loginForm.Show(); // Показуємо форму авторизації
-            this.Close(); // Закриваємо поточну форму (MainWind)
+            loginForm.Show();
+            this.Close();
         }
 
         private void comboBox_NewUserLevel_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            // Обробник зміни вибраного рівня доступу користувача
         }
 
         private void MainWind_Load(object sender, EventArgs e)
         {
-
+            // Обробник завантаження форми
         }
-
-       
     }
 }

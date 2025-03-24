@@ -11,11 +11,27 @@
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        // У FileManager.Designer.cs знайдіть метод Dispose і додайте туди ваш код:
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                if (accessTimer != null)
+                {
+                    accessTimer.Stop();
+                    accessTimer.Dispose();
+                }
+
+                if (currentImage != null)
+                {
+                    currentImage.Dispose();
+                    currentImage = null;
+                }
+
+                if (components != null)
+                {
+                    components.Dispose();
+                }
             }
             base.Dispose(disposing);
         }

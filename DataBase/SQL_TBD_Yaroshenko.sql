@@ -119,13 +119,13 @@ GO
 INSERT INTO USER_FILE_ACCESS (USERNAME, FILE_NAME, CAN_READ, CAN_WRITE, OWN, DURATION_SECONDS)
 VALUES 
     ('Yar1', 'config.txt', 1, 1, 1, NULL),
-    ('Yar1', 'logo.png', 1, 0, 0, 30),
-    ('Yar2', 'config.txt', 1, 0, 0, 90),
+    ('Yar1', 'logo.png', 1, 0, 0, 10),
+    ('Yar2', 'config.txt', 1, 0, 0, 20),
     ('Yar2', 'data.txt', 1, 1, 1, NULL),
-    ('Yar3', 'app.lnk', 1, 0, 1, 90),
-    ('Yar3', 'data.txt', 1, 0, 0, 60),
+    ('Yar3', 'app.lnk', 1, 0, 1, 20),
+    ('Yar3', 'data.txt', 1, 0, 0, 15),
     ('Yar3', 'readme.txt', 1, 1, 1, NULL),
-    ('Yar4', 'readme.txt', 1, 0, 0, 30),
+    ('Yar4', 'readme.txt', 1, 0, 0, 10),
     ('Yar4', 'logo.png', 1, 1, 1, NULL),
     ('Yar5', 'app.lnk', 1, 0, 1, NULL),
     ('Admin', 'app.lnk', 1, 1, 1, NULL),
@@ -142,7 +142,7 @@ WHERE USERNAME = 'Yar2' AND FILE_NAME = 'config.txt';
 
 -- Оновлення для Yar3 і app.exe
 UPDATE USER_FILE_ACCESS
-SET CAN_EXECUTE = 1, OWN = 0
+SET CAN_EXECUTE = 1, OWN = 0, CAN_READ = 0
 WHERE USERNAME = 'Yar3' AND FILE_NAME = 'app.lnk';
 
 -- Оновлення для Yar4 і readme.txt
@@ -157,11 +157,11 @@ WHERE USERNAME = 'Yar5' AND FILE_NAME = 'app.lnk';
 
 -- Оновлення для Admin і app.exe
 UPDATE USER_FILE_ACCESS
-SET CAN_READ = 1, CAN_WRITE = 1, OWN = 0, CAN_EXECUTE = 1
+SET CAN_READ = 0, CAN_WRITE = 0, OWN = 0, CAN_EXECUTE = 1
 WHERE USERNAME = 'Admin' AND FILE_NAME = 'app.lnk';
 
 UPDATE USER_FILE_ACCESS
-SET CAN_READ = 1, CAN_WRITE = 1, OWN = 1, CAN_EXECUTE = 1
+SET CAN_READ = 0, CAN_WRITE = 1, OWN = 1, CAN_EXECUTE = 1
 WHERE USERNAME = 'Yar5' AND FILE_NAME = 'app.lnk';
 
 -- Виведення даних
