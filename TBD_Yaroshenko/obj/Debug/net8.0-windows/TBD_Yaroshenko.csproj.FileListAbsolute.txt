@@ -77,3 +77,4 @@ C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko
 C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll
 C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\obj\Debug\net8.0-windows\TBD_Yaroshenko.MainWind_Discretionary.resources
 C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\obj\Debug\net8.0-windows\TBD_Yaroshenko.MainWind_RoleBased.resources
+C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\obj\Debug\net8.0-windows\TBD_Yaroshenko.FileManagerRB.resources

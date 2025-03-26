@@ -108,14 +108,12 @@ namespace TBD_Yaroshenko
                 return;
             }
 
-            // Отримуємо вибраний тип контролю доступу
             string accessControlType = comboBoxAccessControl.SelectedItem?.ToString() ?? "Undefined";
 
             using (var con = new SqlConnection(cs))
             {
                 con.Open();
 
-                // Перевірка авторизації
                 string query = "SELECT * FROM LOGIN_TBL WHERE USERNAME = @user AND PASS = @pass";
                 var cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@user", textBox1.Text);
@@ -125,9 +123,9 @@ namespace TBD_Yaroshenko
                 if (dr.HasRows)
                 {
                     dr.Read();
-                    string role = dr["SECURITY_LEVEL"]?.ToString() ?? "Unclassified";
+                    string securityLevel = dr["SECURITY_LEVEL"]?.ToString() ?? "Unclassified"; // Змінили ім'я змінної
+                    string userRole = dr["ROLE"]?.ToString() ?? "User"; // Використовуємо інше ім'я змінної
 
-                    // Оновлення типу контролю доступу в БД
                     dr.Close();
                     string updateQuery = "UPDATE LOGIN_TBL SET ACCESS_CONTROL_TYPE = @accessControlType WHERE USERNAME = @user";
                     var updateCmd = new SqlCommand(updateQuery, con);
@@ -135,9 +133,8 @@ namespace TBD_Yaroshenko
                     updateCmd.Parameters.AddWithValue("@user", textBox1.Text);
                     updateCmd.ExecuteNonQuery();
 
-                    MessageBox.Show($"Login successful! Security Level: {role}, Access Control Type: {accessControlType}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"Login successful! Security Level: {securityLevel}, Access Control Type: {accessControlType}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    // Відкриття відповідної форми залежно від типу контролю доступу
                     if (accessControlType == "Discretionary")
                     {
                         MainWind_Discretionary mainWindDiscretionary = new MainWind_Discretionary(textBox1.Text, accessControlType);
@@ -145,7 +142,7 @@ namespace TBD_Yaroshenko
                     }
                     else if (accessControlType == "Role-Based")
                     {
-                        MainWind_RoleBased mainWindRoleBased = new MainWind_RoleBased(textBox1.Text);
+                        MainWind_RoleBased mainWindRoleBased = new MainWind_RoleBased(textBox1.Text, userRole); // Використовуємо userRole
                         mainWindRoleBased.Show();
                     }
                     else
@@ -241,19 +238,26 @@ namespace TBD_Yaroshenko
             try
             {
                 using (var con = new SqlConnection(cs))
-                using (var cmd = new SqlCommand("UPDATE LOGIN_TBL SET PASS = @newPass WHERE USERNAME = @user", con))
                 {
-                    cmd.Parameters.Add(new SqlParameter("@user", SqlDbType.VarChar, 50)).Value = textBox1.Text;
-                    cmd.Parameters.Add(new SqlParameter("@newPass", SqlDbType.VarChar, 100)).Value = textBox2.Text;
-                    con.Open();
-                    if (cmd.ExecuteNonQuery() > 0)
+                    // Визначаємо складність нового пароля
+                    string newPasswordComplexity = GetPasswordComplexity(textBox2.Text);
+
+                    // Оновлюємо пароль і складність пароля
+                    using (var cmd = new SqlCommand("UPDATE LOGIN_TBL SET PASS = @newPass, PASSWORD_COMPLEXITY = @complexity WHERE USERNAME = @user", con))
                     {
-                        SavePasswordHistory(textBox1.Text, textBox2.Text);
-                        MessageBox.Show("Password successfully updated", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("User not found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        cmd.Parameters.Add(new SqlParameter("@user", SqlDbType.VarChar, 50)).Value = textBox1.Text;
+                        cmd.Parameters.Add(new SqlParameter("@newPass", SqlDbType.VarChar, 100)).Value = textBox2.Text;
+                        cmd.Parameters.Add(new SqlParameter("@complexity", SqlDbType.VarChar, 10)).Value = newPasswordComplexity;
+                        con.Open();
+                        if (cmd.ExecuteNonQuery() > 0)
+                        {
+                            SavePasswordHistory(textBox1.Text, textBox2.Text);
+                            MessageBox.Show("Password successfully updated", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("User not found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                 }
             }
@@ -271,5 +275,7 @@ namespace TBD_Yaroshenko
         {
             // Обробник завантаження форми
         }
+
+      
     }
 }

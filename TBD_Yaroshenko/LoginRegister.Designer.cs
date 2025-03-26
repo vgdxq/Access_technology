@@ -224,6 +224,7 @@
             comboBoxAccessControl.Name = "comboBoxAccessControl";
             comboBoxAccessControl.Size = new Size(177, 23);
             comboBoxAccessControl.TabIndex = 2;
+
             // 
             // Form1
             // 
