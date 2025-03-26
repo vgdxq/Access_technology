@@ -18,9 +18,11 @@ BEGIN
 END
 GO
 
-ALTER TABLE LOGIN_TBL
-ADD ACCESS_CONTROL_TYPE VARCHAR(20) NOT NULL DEFAULT 'Undefined';
-
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('LOGIN_TBL') AND name = 'ACCESS_CONTROL_TYPE')
+BEGIN
+    ALTER TABLE LOGIN_TBL
+    ADD ACCESS_CONTROL_TYPE VARCHAR(20) NOT NULL DEFAULT 'Undefined';
+END
 -- Перевірка та створення таблиці FILE_ACCESS
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'FILE_ACCESS')
 BEGIN
@@ -89,7 +91,7 @@ GO
 -- Вставка даних у FILE_ACCESS
 MERGE INTO FILE_ACCESS AS target
 USING (VALUES
-    ('app.exe', 'Top Secret'),
+    ('app.lnk', 'Top Secret'),
     ('config.txt', 'Confidential'),
     ('data.txt', 'Secret'),
     ('readme.txt', 'FOUO'),
@@ -118,21 +120,21 @@ GO
 -- Вставка даних про права доступу
 INSERT INTO USER_FILE_ACCESS (USERNAME, FILE_NAME, CAN_READ, CAN_WRITE, OWN, DURATION_SECONDS)
 VALUES 
-    ('Yar1', 'config.txt', 1, 1, 1, NULL),
+    ('Yar1', 'config.txt', 1, 1, 1, 0),
     ('Yar1', 'logo.png', 1, 0, 0, 10),
     ('Yar2', 'config.txt', 1, 0, 0, 20),
-    ('Yar2', 'data.txt', 1, 1, 1, NULL),
+    ('Yar2', 'data.txt', 1, 1, 1, 0),
     ('Yar3', 'app.lnk', 1, 0, 1, 20),
     ('Yar3', 'data.txt', 1, 0, 0, 15),
-    ('Yar3', 'readme.txt', 1, 1, 1, NULL),
+    ('Yar3', 'readme.txt', 1, 1, 1, 0),
     ('Yar4', 'readme.txt', 1, 0, 0, 10),
-    ('Yar4', 'logo.png', 1, 1, 1, NULL),
-    ('Yar5', 'app.lnk', 1, 0, 1, NULL),
-    ('Admin', 'app.lnk', 1, 1, 1, NULL),
-    ('Admin', 'config.txt', 1, 1, 0, NULL),
-    ('Admin', 'data.txt', 1, 1, 0, NULL),
-    ('Admin', 'readme.txt', 1, 1, 0, NULL),
-    ('Admin', 'logo.png', 1, 1, 0, NULL);
+    ('Yar4', 'logo.png', 1, 1, 1, 0),
+    ('Yar5', 'app.lnk', 1, 0, 1, 0),
+    ('Admin', 'app.lnk', 1, 1, 1, 0),
+    ('Admin', 'config.txt', 1, 1, 0, 0),
+    ('Admin', 'data.txt', 1, 1, 0, 0),
+    ('Admin', 'readme.txt', 1, 1, 0, 0),
+    ('Admin', 'logo.png', 1, 1, 0, 0);
 GO
 
 -- Оновлення для Yar2 і config.txt
@@ -164,6 +166,45 @@ UPDATE USER_FILE_ACCESS
 SET CAN_READ = 0, CAN_WRITE = 1, OWN = 1, CAN_EXECUTE = 1
 WHERE USERNAME = 'Yar5' AND FILE_NAME = 'app.lnk';
 
+-- Додавання стовпця Role до LOGIN_TBL
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('LOGIN_TBL') AND name = 'ROLE')
+BEGIN
+    ALTER TABLE LOGIN_TBL
+    ADD ROLE VARCHAR(20) NOT NULL DEFAULT 'User' CHECK (ROLE IN ('Admin', 'Developer', 'User'));
+    PRINT 'Column ROLE added to LOGIN_TBL.';
+END
+ELSE
+BEGIN
+    PRINT 'Column ROLE already exists in LOGIN_TBL.';
+END
+GO
+
+-- Оновлення значень Role для існуючих користувачів
+UPDATE LOGIN_TBL SET ROLE = 'Admin' WHERE USERNAME = 'Admin';
+UPDATE LOGIN_TBL SET ROLE = 'Developer' WHERE USERNAME IN ('Yar1', 'Yar2', 'Yar3');
+UPDATE LOGIN_TBL SET ROLE = 'User' WHERE USERNAME IN ('Yar4', 'Yar5');
+GO
+
+-- Додавання стовпця CONFIDENTIALITY_LEVEL_RB до FILE_ACCESS
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FILE_ACCESS') AND name = 'CONFIDENTIALITY_LEVEL_RB')
+BEGIN
+    ALTER TABLE FILE_ACCESS
+    ADD CONFIDENTIALITY_LEVEL_RB VARCHAR(20) NOT NULL DEFAULT 'Public' 
+    CHECK (CONFIDENTIALITY_LEVEL_RB IN ('Secret', 'Confidential', 'Public'));
+    PRINT 'Column CONFIDENTIALITY_LEVEL_RB added to FILE_ACCESS.';
+END
+ELSE
+BEGIN
+    PRINT 'Column CONFIDENTIALITY_LEVEL_RB already exists in FILE_ACCESS.';
+END
+GO
+
+-- Оновлення значень CONFIDENTIALITY_LEVEL_RB для існуючих файлів
+UPDATE FILE_ACCESS SET CONFIDENTIALITY_LEVEL_RB = 'Secret' WHERE FILE_NAME = 'config.txt';
+UPDATE FILE_ACCESS SET CONFIDENTIALITY_LEVEL_RB = 'Confidential' WHERE FILE_NAME IN ('app.lnk', 'data.txt');
+UPDATE FILE_ACCESS SET CONFIDENTIALITY_LEVEL_RB = 'Public' WHERE FILE_NAME IN ('readme.txt', 'logo.png');
+GO
+
 -- Виведення даних
 SELECT * FROM LOGIN_TBL;
 SELECT * FROM USER_FILE_ACCESS;
@@ -171,7 +212,8 @@ SELECT * FROM FILE_ACCESS;
 SELECT * FROM PASSWORD_HISTORY;
 GO
 
+
 --DELETE  FROM LOGIN_TBL;
---DELETE  FROM FILE_ACCESS;
 --DELETE  FROM USER_FILE_ACCESS;
+--DELETE  FROM FILE_ACCESS;
 --DELETE  FROM PASSWORD_HISTORY;

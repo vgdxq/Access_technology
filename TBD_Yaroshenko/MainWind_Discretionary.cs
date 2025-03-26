@@ -185,6 +185,20 @@ namespace TBD_Yaroshenko
             bool canWrite = checkBox_Writing.Checked;
             bool canExecute = IsExecutableFile(selectedFile) && checkBox_Execute.Checked;
 
+            // Check password complexity if granting execute permission
+            if (canExecute)
+            {
+                string complexity = GetUserPasswordComplexity(selectedUser);
+                if (complexity != "High")
+                {
+                    MessageBox.Show("Execute permission can only be granted to users with High password complexity.\n" +
+                                   $"User '{selectedUser}' has {complexity} complexity password.",
+                                   "Permission Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    checkBox_Execute.Checked = false;
+                    return;
+                }
+            }
+
             try
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
@@ -201,11 +215,11 @@ namespace TBD_Yaroshenko
                         if (count > 0)
                         {
                             string updateQuery = @"UPDATE USER_FILE_ACCESS 
-                                         SET CAN_READ = @CanRead, 
-                                             CAN_WRITE = @CanWrite, 
-                                             CAN_EXECUTE = @CanExecute 
-                                         WHERE USERNAME = @Username 
-                                         AND FILE_NAME = @FileName";
+                                 SET CAN_READ = @CanRead, 
+                                     CAN_WRITE = @CanWrite, 
+                                     CAN_EXECUTE = @CanExecute 
+                                 WHERE USERNAME = @Username 
+                                 AND FILE_NAME = @FileName";
                             using (SqlCommand updateCmd = new SqlCommand(updateQuery, con))
                             {
                                 updateCmd.Parameters.AddWithValue("@CanRead", canRead);
@@ -219,8 +233,8 @@ namespace TBD_Yaroshenko
                         else
                         {
                             string insertQuery = @"INSERT INTO USER_FILE_ACCESS 
-                                         (USERNAME, FILE_NAME, CAN_READ, CAN_WRITE, CAN_EXECUTE, OWN) 
-                                         VALUES (@Username, @FileName, @CanRead, @CanWrite, @CanExecute, 0)";
+                                 (USERNAME, FILE_NAME, CAN_READ, CAN_WRITE, CAN_EXECUTE, OWN) 
+                                 VALUES (@Username, @FileName, @CanRead, @CanWrite, @CanExecute, 0)";
                             using (SqlCommand insertCmd = new SqlCommand(insertQuery, con))
                             {
                                 insertCmd.Parameters.AddWithValue("@Username", selectedUser);
@@ -439,6 +453,21 @@ namespace TBD_Yaroshenko
             if (!isExecutable)
             {
                 checkBox_Execute.Checked = false;
+                toolTip1.SetToolTip(checkBox_Execute, "This file type doesn't support execution");
+            }
+            else
+            {
+                string complexity = GetUserPasswordComplexity(selectedUser);
+                if (complexity != "High")
+                {
+                    toolTip1.SetToolTip(checkBox_Execute,
+                        "Execute permission requires High password complexity.\n" +
+                        $"Current user has {complexity} complexity password.");
+                }
+                else
+                {
+                    toolTip1.SetToolTip(checkBox_Execute, "User meets password complexity requirements for execute permission");
+                }
             }
 
             try
@@ -482,6 +511,30 @@ namespace TBD_Yaroshenko
             {
                 MessageBox.Show($"Error loading access rights: {ex.Message}", "Error",
                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private string GetUserPasswordComplexity(string username)
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+                    string query = "SELECT PASSWORD_COMPLEXITY FROM LOGIN_TBL WHERE USERNAME = @Username";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@Username", username);
+                        object result = cmd.ExecuteScalar();
+                        return result?.ToString() ?? "Low"; // Default to Low if not found
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error checking password complexity: {ex.Message}", "Error",
+                               MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return "Low"; // Default to Low on error
             }
         }
     }

@@ -4,6 +4,9 @@
     <Compile Update="FileManager.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="FileManagerRB.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="LoginRegister.cs">
       <SubType>Form</SubType>
     </Compile>

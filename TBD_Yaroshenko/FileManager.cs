@@ -347,14 +347,18 @@ namespace TBD_Yaroshenko
 
             listBoxFiles.Items.Clear();
             var accessibleFiles = new List<string>();
-            string query = @"SELECT FILE_NAME 
-                FROM USER_FILE_ACCESS 
-                WHERE USERNAME = @username 
-                AND (
-                    (FILE_NAME LIKE '%.exe' OR FILE_NAME LIKE '%.lnk') AND CAN_EXECUTE = 1
-                    OR 
-                    (NOT (FILE_NAME LIKE '%.exe' OR FILE_NAME LIKE '%.lnk') AND CAN_READ = 1)
-                )";
+            string query = @"
+        SELECT UFA.FILE_NAME 
+        FROM USER_FILE_ACCESS UFA
+        JOIN LOGIN_TBL LT ON UFA.USERNAME = LT.USERNAME
+        WHERE UFA.USERNAME = @username 
+        AND (
+            (UFA.FILE_NAME LIKE '%.exe' OR UFA.FILE_NAME LIKE '%.lnk') 
+            AND UFA.CAN_EXECUTE = 1 
+            AND LT.PASSWORD_COMPLEXITY = 'High'
+            OR 
+            (NOT (UFA.FILE_NAME LIKE '%.exe' OR UFA.FILE_NAME LIKE '%.lnk') AND UFA.CAN_READ = 1)
+        )";
 
             using (SqlConnection conn = new SqlConnection(cs))
             using (SqlCommand cmd = new SqlCommand(query, conn))
