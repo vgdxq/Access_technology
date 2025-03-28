@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TBD_Yaroshenko")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b15e22d954c84cb0f9c303b672671357c16f471b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+be6f86961ab9ed1bba8475dd9f9f82802b32c73e")]
 [assembly: System.Reflection.AssemblyProductAttribute("TBD_Yaroshenko")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TBD_Yaroshenko")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Configuration;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -10,6 +10,14 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+
 
 namespace TBD_Yaroshenko
 {
@@ -28,9 +36,6 @@ namespace TBD_Yaroshenko
         private HashSet<string> _expiredFiles = new HashSet<string>();
         private HashSet<string> _shownExpiredFiles = new HashSet<string>();
 
-
-
-
         // Клас для зберігання інформації про файл
         public class FileItem
         {
@@ -39,7 +44,7 @@ namespace TBD_Yaroshenko
             public string FilePath { get; set; }
         }
 
-        // Клас для зберігання прав доступу
+        // Клас для зберігання прав доступу до файлів
         public class FileAccessInfo
         {
             public bool CanRead { get; set; }
@@ -47,11 +52,9 @@ namespace TBD_Yaroshenko
             public bool CanExecute { get; set; }
             public int DurationSeconds { get; set; }
             public bool IsExpired { get; set; }
-
-            // Додаємо час початку доступу
             public DateTime AccessStartTime { get; set; }
 
-            // Властивість для перевірки часу
+            // Метод для перевірки чи закінчився час доступу
             public bool CheckIfExpired()
             {
                 if (DurationSeconds <= 0) return false;
@@ -60,7 +63,7 @@ namespace TBD_Yaroshenko
             }
         }
 
-        // Клас для керування таймером доступу
+        // Клас для керування таймером доступу до файлу
         public class FileAccessTimer
         {
             public string FileName { get; set; }
@@ -84,18 +87,20 @@ namespace TBD_Yaroshenko
             InitializeTimer();
         }
 
+        // Ініціалізація даних про доступ до файлів
         private void InitializeFileAccessData()
         {
-            // Ініціалізація даних про доступ до файлів
-            // (можна завантажити з бази даних)
+            // Можна завантажити дані з бази даних
         }
 
+        // Ініціалізація таймера для контролю часу доступу
         private void InitializeTimer()
         {
             accessTimer.Interval = 1000;
             accessTimer.Tick += accessTimer_Tick;
         }
 
+        // Завантаження доступних файлів для поточного користувача
         private void LoadAvailableFiles()
         {
             listBoxFiles.Items.Clear();
@@ -122,20 +127,22 @@ namespace TBD_Yaroshenko
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка завантаження файлів: {ex.Message}", "Помилка",
+                MessageBox.Show($"Error loading files: {ex.Message}", "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // Отримання рівня конфіденційності файлу
         private string GetFileConfidentialityLevel(string fileName)
         {
-            // Отримати рівень конфіденційності з бази даних
-            return "Public"; // Заглушка
+            // Заглушка - реальна реалізація має отримувати дані з БД
+            return "Public";
         }
 
+        // Перевірка чи має поточний користувач доступ до файлу
         private bool HasFileAccess(string fileName)
         {
-            // Адмін має доступ до всіх файлів
+            // Адміністратор має доступ до всіх файлів
             if (_userRole == "Admin") return true;
 
             // Перевірка прав доступу для інших ролей
@@ -143,9 +150,10 @@ namespace TBD_Yaroshenko
             return accessInfo != null && (accessInfo.CanRead || accessInfo.CanWrite || accessInfo.CanExecute);
         }
 
+        // Отримання інформації про поточні права доступу до файлу
         private FileAccessInfo GetCurrentFileAccessInfo(string fileName)
         {
-            // First check if this file is locally marked as expired
+            // Спочатку перевіряємо чи файл вже позначений як протермінований
             if (_expiredFiles.Contains(fileName))
             {
                 return new FileAccessInfo
@@ -189,12 +197,13 @@ namespace TBD_Yaroshenko
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Помилка отримання прав доступу: {ex.Message}");
+                Debug.WriteLine($"Error getting access rights: {ex.Message}");
             }
 
             return null;
         }
 
+        // Відкриття обраного файлу з перевіркою прав доступу
         private void OpenSelectedFile()
         {
             if (listBoxFiles.SelectedItem == null) return;
@@ -204,7 +213,7 @@ namespace TBD_Yaroshenko
 
             if (file == null || !File.Exists(file.FilePath))
             {
-                MessageBox.Show("Файл не знайдено", "Помилка",
+                MessageBox.Show("File not found", "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -213,7 +222,7 @@ namespace TBD_Yaroshenko
 
             if (accessInfo != null && accessInfo.IsExpired)
             {
-                MessageBox.Show("Доступ до цього файлу закінчився", "Помилка доступу",
+                MessageBox.Show("Access to this file has expired", "Access Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -223,7 +232,6 @@ namespace TBD_Yaroshenko
 
             try
             {
-
                 textBoxFileContent.Visible = false;
                 pictureBox.Visible = false;
                 btnSave.Visible = false;
@@ -246,7 +254,7 @@ namespace TBD_Yaroshenko
                         }
                         else
                         {
-                            MessageBox.Show("У вас немає прав для читання цього файлу", "Помилка доступу",
+                            MessageBox.Show("You don't have permission to read this file", "Access Error",
                                           MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
                         break;
@@ -272,7 +280,7 @@ namespace TBD_Yaroshenko
                         }
                         else
                         {
-                            MessageBox.Show("У вас немає прав для перегляду цього зображення", "Помилка доступу",
+                            MessageBox.Show("You don't have permission to view this image", "Access Error",
                                           MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
                         break;
@@ -305,35 +313,36 @@ namespace TBD_Yaroshenko
                             }
                             catch (Win32Exception winEx)
                             {
-                                MessageBox.Show($"Помилка запуску програми: {winEx.Message}", "Помилка",
+                                MessageBox.Show($"Error starting program: {winEx.Message}", "Error",
                                               MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
                         else
                         {
-                            MessageBox.Show("У вас немає прав для запуску цього файлу", "Помилка доступу",
+                            MessageBox.Show("You don't have permission to execute this file", "Access Error",
                                           MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
                         break;
 
                     default:
-                        MessageBox.Show("Непідтримуваний тип файлу", "Помилка",
+                        MessageBox.Show("Unsupported file type", "Error",
                                       MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         break;
                 }
             }
             catch (UnauthorizedAccessException)
             {
-                MessageBox.Show("Доступ до файлу заборонено", "Помилка",
+                MessageBox.Show("Access to the file is denied", "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка: {ex.Message}", "Помилка",
+                MessageBox.Show($"Error: {ex.Message}", "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // Запуск таймера для контролю часу доступу до файлу
         private void StartAccessTimer(string fileName, int durationSeconds)
         {
             if (_accessTimers.ContainsKey(fileName))
@@ -354,23 +363,24 @@ namespace TBD_Yaroshenko
             UpdateAccessTimeLabel();
         }
 
-
+        // Блокування доступу до файлу після закінчення часу
         private void BlockFileAccess(string fileName)
         {
-            // Just track expiration locally instead of modifying the database
-            _expiredFiles.Add(fileName);
-
-            // Optional: Show message to user
-            if (!_shownExpiredFiles.Contains(fileName))
+            // Додаємо файл до списку протермінованих (якщо ще не додано)
+            if (_expiredFiles.Add(fileName))
             {
-                MessageBox.Show($"Доступ до файлу {fileName} закінчився",
-                              "Інформація",
-                              MessageBoxButtons.OK,
-                              MessageBoxIcon.Information);
-                _shownExpiredFiles.Add(fileName);
+                // Показуємо повідомлення тільки при першому додаванні
+                this.Invoke((MethodInvoker)(() =>
+                {
+                    MessageBox.Show($"Access to file {fileName} has expired",
+                                  "Access Expired",
+                                  MessageBoxButtons.OK,
+                                  MessageBoxIcon.Information);
+                }));
             }
         }
 
+        // Оновлення відображення часу доступу
         private void UpdateAccessTimeLabel()
         {
             if (listBoxFiles.SelectedItem == null) return;
@@ -379,18 +389,19 @@ namespace TBD_Yaroshenko
             if (_accessTimers.TryGetValue(selectedFile, out var timerInfo))
             {
                 var remaining = timerInfo.DurationSeconds - (DateTime.Now - timerInfo.StartTime).TotalSeconds;
-                labelAccessTime.Text = $"Доступ закінчиться через: {Math.Max(0, (int)remaining)} сек";
+                labelAccessTime.Text = $"Access expires in: {Math.Max(0, (int)remaining)} sec";
             }
             else if (_userRole == "Admin")
             {
-                labelAccessTime.Text = "Доступ без обмежень";
+                labelAccessTime.Text = "Unlimited access";
             }
             else
             {
-                labelAccessTime.Text = "Доступ не обмежений за часом";
+                labelAccessTime.Text = "No time limit for access";
             }
         }
 
+        // Закриття поточного файлу
         private void CloseCurrentFile()
         {
             textBoxFileContent.Visible = false;
@@ -406,6 +417,7 @@ namespace TBD_Yaroshenko
             }
         }
 
+        // Обробник події збереження файлу
         private void btnSave_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(_currentFilePath)) return;
@@ -417,24 +429,25 @@ namespace TBD_Yaroshenko
                 if (fileExtension == ".txt")
                 {
                     File.WriteAllText(_currentFilePath, textBoxFileContent.Text);
-                    MessageBox.Show("Файл успішно збережено", "Успіх",
+                    MessageBox.Show("File saved successfully", "Success",
                                   MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else if (fileExtension == ".png" || fileExtension == ".jpg" ||
                          fileExtension == ".jpeg" || fileExtension == ".gif")
                 {
                     _currentImage.Save(_currentFilePath);
-                    MessageBox.Show("Зображення успішно збережено", "Успіх",
+                    MessageBox.Show("Image saved successfully", "Success",
                                   MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка збереження: {ex.Message}", "Помилка",
+                MessageBox.Show($"Error saving file: {ex.Message}", "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // Обробник події обертання зображення
         private void buttonRotate_Click(object sender, EventArgs e)
         {
             if (_currentImage != null)
@@ -445,22 +458,24 @@ namespace TBD_Yaroshenko
             }
         }
 
+        // Обробник зміни вибраного файлу у списку
         private void listBoxFiles_SelectedIndexChanged(object sender, EventArgs e)
         {
             OpenSelectedFile();
         }
 
+        // Обробник події таймера для контролю часу доступу
         private void accessTimer_Tick(object sender, EventArgs e)
         {
             bool anyTimerRunning = false;
-            List<string> filesToBlock = new List<string>();
+            var currentTime = DateTime.Now;
 
             foreach (var timerInfo in _accessTimers.Values.ToList())
             {
-                var elapsed = DateTime.Now - timerInfo.StartTime;
-                if (elapsed.TotalSeconds >= timerInfo.DurationSeconds)
+                if ((currentTime - timerInfo.StartTime).TotalSeconds >= timerInfo.DurationSeconds)
                 {
-                    filesToBlock.Add(timerInfo.FileName);
+                    // Блокуємо доступ
+                    BlockFileAccess(timerInfo.FileName);
 
                     // Закриваємо файл, якщо він відкритий
                     if (listBoxFiles.SelectedItem?.ToString() == timerInfo.FileName)
@@ -468,49 +483,26 @@ namespace TBD_Yaroshenko
                         CloseCurrentFile();
                     }
 
-                    // Закриваємо процес для .exe файлів
+                    // Закриваємо процеси
                     if (_runningProcesses.TryGetValue(timerInfo.FileName, out var process))
                     {
                         try
                         {
-                            if (!process.HasExited)
-                            {
-                                process.Kill();
-                                process.WaitForExit(1000);
-                            }
+                            if (!process.HasExited) process.Kill();
                         }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine($"Помилка закриття процесу: {ex.Message}");
-                        }
+                        catch { /* Ігноруємо помилки */ }
                         finally
                         {
                             _runningProcesses.Remove(timerInfo.FileName);
                         }
                     }
+
+                    // Видаляємо таймер
+                    _accessTimers.Remove(timerInfo.FileName);
                 }
                 else
                 {
                     anyTimerRunning = true;
-                }
-            }
-
-            // Блокуємо доступ до файлів
-            foreach (var fileName in filesToBlock)
-            {
-                if (_accessTimers.ContainsKey(fileName))
-                {
-                    _accessTimers[fileName].Stop();
-                    _accessTimers.Remove(fileName);
-
-                    // Оновлюємо статус файлу в базі даних
-                    BlockFileAccess(fileName);
-
-                    // Показуємо повідомлення
-                    MessageBox.Show($"Доступ до файлу {fileName} закінчився",
-                                  "Інформація",
-                                  MessageBoxButtons.OK,
-                                  MessageBoxIcon.Information);
                 }
             }
 
@@ -522,12 +514,14 @@ namespace TBD_Yaroshenko
             }
         }
 
+        // Скидання обмежень доступу до файлу
         public void ResetFileAccess(string fileName)
         {
             _expiredFiles.Remove(fileName);
             _shownExpiredFiles.Remove(fileName);
         }
 
+        // Обробник закриття форми
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             foreach (var process in _runningProcesses.Values)

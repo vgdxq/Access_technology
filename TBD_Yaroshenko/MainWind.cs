@@ -308,7 +308,7 @@ namespace TBD_Yaroshenko
         // Обробник події для виходу з системи
         private void button_LogOut_Click(object sender, EventArgs e)
         {
-            Form1 loginForm = new Form1();
+            radioNoInfo loginForm = new radioNoInfo();
             loginForm.Show();
             this.Close();
         }

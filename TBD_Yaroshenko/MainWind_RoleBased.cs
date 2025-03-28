@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -34,10 +34,6 @@ namespace TBD_Yaroshenko
                 InitializeRoleManagement();
                 InitializeFileManagement();
             }
-
-            // Підписка на події
-
-
         }
 
         public MainWind_RoleBased(string username) : this(username, "") { }
@@ -74,7 +70,7 @@ namespace TBD_Yaroshenko
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка завантаження користувачів: {ex.Message}");
+                MessageBox.Show($"Error loading users: {ex.Message}");
             }
         }
 
@@ -111,7 +107,7 @@ namespace TBD_Yaroshenko
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка завантаження ролі: {ex.Message}");
+                MessageBox.Show($"Error loading user role: {ex.Message}");
             }
         }
 
@@ -119,12 +115,53 @@ namespace TBD_Yaroshenko
         {
             if (comboBox_Users.SelectedItem == null || comboBox_UserRole.SelectedItem == null)
             {
-                MessageBox.Show("Виберіть користувача та роль");
+                MessageBox.Show("Please select a user and role");
                 return;
             }
 
             var username = comboBox_Users.SelectedItem.ToString();
             var newRole = comboBox_UserRole.SelectedItem.ToString();
+
+            // Якщо нова роль - адміністратор, перевіряємо кількість адміністраторів
+            if (newRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    using (var con = new SqlConnection(cs))
+                    {
+                        con.Open();
+
+                        // Отримуємо поточну кількість адміністраторів
+                        using (var countCmd = new SqlCommand(
+                            "SELECT COUNT(*) FROM LOGIN_TBL WHERE ROLE = 'Admin'", con))
+                        {
+                            int adminCount = (int)countCmd.ExecuteScalar();
+
+                            // Якщо користувач вже адміністратор, дозволяємо зміну
+                            bool isAlreadyAdmin = false;
+                            using (var checkCmd = new SqlCommand(
+                                "SELECT ROLE FROM LOGIN_TBL WHERE USERNAME = @username", con))
+                            {
+                                checkCmd.Parameters.AddWithValue("@username", username);
+                                var currentRole = checkCmd.ExecuteScalar()?.ToString();
+                                isAlreadyAdmin = currentRole?.Equals("Admin", StringComparison.OrdinalIgnoreCase) ?? false;
+                            }
+
+                            // Якщо адміністраторів вже 2 і користувач не був адміністратором - заборонити
+                            if (adminCount >= 2 && !isAlreadyAdmin)
+                            {
+                                MessageBox.Show("Cannot assign Admin role: there are already 2 administrators in the system.");
+                                return;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error checking admin count: {ex.Message}");
+                    return;
+                }
+            }
 
             try
             {
@@ -138,7 +175,7 @@ namespace TBD_Yaroshenko
 
                     if (cmd.ExecuteNonQuery() > 0)
                     {
-                        MessageBox.Show($"Роль {username} змінена на {newRole}");
+                        MessageBox.Show($"Role for {username} changed to {newRole}");
 
                         if (username.Equals(_username))
                         {
@@ -150,7 +187,7 @@ namespace TBD_Yaroshenko
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка зміни ролі: {ex.Message}");
+                MessageBox.Show($"Error changing role: {ex.Message}");
             }
         }
 
@@ -171,13 +208,13 @@ namespace TBD_Yaroshenko
             {
                 comboBox_Files.Items.Clear();
 
-                // Файли з папки
+                // Завантаження файлів з папки
                 var files = Directory.GetFiles(_dataFolderPath)
                     .Select(Path.GetFileName)
                     .Where(f => !string.IsNullOrEmpty(f))
                     .ToList();
 
-                // Файли з бази даних
+                // Завантаження файлів з бази даних
                 using (var con = new SqlConnection(cs))
                 using (var cmd = new SqlCommand("SELECT FILE_NAME FROM FILE_ACCESS", con))
                 {
@@ -200,7 +237,7 @@ namespace TBD_Yaroshenko
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка завантаження файлів: {ex.Message}");
+                MessageBox.Show($"Error loading files: {ex.Message}");
             }
         }
 
@@ -230,7 +267,7 @@ namespace TBD_Yaroshenko
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка завантаження рівня конфіденційності: {ex.Message}");
+                MessageBox.Show($"Error loading confidentiality level: {ex.Message}");
             }
         }
 
@@ -248,9 +285,9 @@ namespace TBD_Yaroshenko
                 using (SqlConnection con = new SqlConnection(cs))
                 {
                     string query = @"
-                SELECT ROLE, CAN_READ, CAN_WRITE, CAN_EXECUTE, DURATION_SECONDS
-                FROM FILE_ACCESS_RB
-                WHERE FILE_NAME = @fileName";
+                        SELECT ROLE, CAN_READ, CAN_WRITE, CAN_EXECUTE, DURATION_SECONDS
+                        FROM FILE_ACCESS_RB
+                        WHERE FILE_NAME = @fileName";
 
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
@@ -273,7 +310,7 @@ namespace TBD_Yaroshenko
                     }
                 }
 
-                // Only add default rows if no data was found
+                // Додавання рядків за замовчуванням, якщо дані не знайдені
                 if (dt.Rows.Count == 0)
                 {
                     dt.Rows.Add("Admin", false, false, false, 0);
@@ -285,7 +322,7 @@ namespace TBD_Yaroshenko
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка завантаження прав доступу: {ex.Message}");
+                MessageBox.Show($"Error loading access rights: {ex.Message}");
             }
         }
 
@@ -302,7 +339,7 @@ namespace TBD_Yaroshenko
                 {
                     try
                     {
-                        // Delete old records
+                        // Видалення старих записів
                         using (SqlCommand deleteCmd = new SqlCommand(
                             "DELETE FROM FILE_ACCESS_RB WHERE FILE_NAME = @fileName", con, transaction))
                         {
@@ -310,15 +347,15 @@ namespace TBD_Yaroshenko
                             deleteCmd.ExecuteNonQuery();
                         }
 
-                        // Insert new records
+                        // Додавання нових записів
                         foreach (DataGridViewRow row in dataGridView_AccessRights.Rows)
                         {
                             if (row.IsNewRow) continue;
 
                             using (SqlCommand insertCmd = new SqlCommand(
                                 @"INSERT INTO FILE_ACCESS_RB 
-                        (FILE_NAME, ROLE, CAN_READ, CAN_WRITE, CAN_EXECUTE, DURATION_SECONDS)
-                        VALUES (@fileName, @role, @read, @write, @execute, @duration)",
+                                (FILE_NAME, ROLE, CAN_READ, CAN_WRITE, CAN_EXECUTE, DURATION_SECONDS)
+                                VALUES (@fileName, @role, @read, @write, @execute, @duration)",
                                 con, transaction))
                             {
                                 insertCmd.Parameters.AddWithValue("@fileName", fileName);
@@ -333,26 +370,23 @@ namespace TBD_Yaroshenko
                         }
 
                         transaction.Commit();
-                        MessageBox.Show("Права доступу успішно збережено");
+                        MessageBox.Show("Access rights saved successfully");
                     }
                     catch (Exception ex)
                     {
                         transaction.Rollback();
-                        MessageBox.Show($"Помилка збереження прав доступу: {ex.Message}");
-                        // Log the full error details
+                        MessageBox.Show($"Error saving access rights: {ex.Message}");
                         Debug.WriteLine(ex.ToString());
                     }
                 }
             }
         }
 
-
-
         private void button_ApplyFileLevel_Click(object sender, EventArgs e)
         {
             if (comboBox_Files.SelectedItem == null || comboBox_NewFileLevel.SelectedItem == null)
             {
-                MessageBox.Show("Виберіть файл та рівень конфіденційності");
+                MessageBox.Show("Please select a file and confidentiality level");
                 return;
             }
 
@@ -385,13 +419,13 @@ namespace TBD_Yaroshenko
                         }
                     }
 
-                    MessageBox.Show($"Рівень конфіденційності файлу {fileName} змінено на {newLevel}");
+                    MessageBox.Show($"Confidentiality level for {fileName} changed to {newLevel}");
                     LoadAccessRights(fileName);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка зміни рівня конфіденційності: {ex.Message}");
+                MessageBox.Show($"Error changing confidentiality level: {ex.Message}");
             }
         }
 
@@ -420,7 +454,7 @@ namespace TBD_Yaroshenko
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Помилка завантаження ролі: {ex.Message}");
+                    MessageBox.Show($"Error loading user role: {ex.Message}");
                     _userRole = "User";
                 }
             }
@@ -453,11 +487,10 @@ namespace TBD_Yaroshenko
 
         private void button_LogOut_Click(object sender, EventArgs e)
         {
-            new Form1().Show();
+            new radioNoInfo().Show();
             this.Close();
         }
 
         #endregion
-
     }
 }

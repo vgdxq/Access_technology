@@ -298,7 +298,7 @@ namespace TBD_Yaroshenko
         private void button_LogOut_Click(object? sender, EventArgs e)
         {
             this.Close();
-            Form1 loginForm = new Form1();
+            radioNoInfo loginForm = new radioNoInfo();
             loginForm.Show();
         }
 
