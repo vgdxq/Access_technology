@@ -10,6 +10,7 @@ using Microsoft.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 
+
 namespace TBD_Yaroshenko
 {
     public partial class radioNoInfo : Form
@@ -283,97 +284,121 @@ namespace TBD_Yaroshenko
         {
             // Обробник завантаження форми
         }
-        #region Brute Force
+        #region Brute Force Implementation
 
-        private bool isBruteForceRunning = false;
+        private volatile bool isBruteForceRunning = false;
         private DateTime bruteForceStartTime;
         private string currentUsername;
         private string foundPassword;
-        private int bruteForceAttempts;
+        private long bruteForceAttempts;
         private long totalIterations;
         private long currentIteration;
+        private CancellationTokenSource cts;
+        private readonly object progressLock = new object();
+        private System.Threading.Timer progressTimer;
 
         private void btnStartBrute_Click_1(object sender, EventArgs e)
         {
             if (isBruteForceRunning) return;
-            txtBruteLog.Clear();
 
-            var txtBruteUser = this.txtBruteUser;
-            var numLength = this.numLength;
-            var chkExactLength = this.chkExactLength;
-            var lblStatus = this.lblBruteStatus;
-            var progressBar = this.progressBarBrute;
+            try
+            {
+                InitializeBruteForceOperation();
+                StartBruteForceAttack();
+            }
+            catch (Exception ex)
+            {
+                HandleInitializationError(ex);
+            }
+        }
 
+        private void InitializeBruteForceOperation()
+        {
+            // Validate inputs
             if (string.IsNullOrWhiteSpace(txtBruteUser?.Text))
             {
-                MessageBox.Show("Please enter username", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                throw new ArgumentException("Username cannot be empty");
             }
 
-            currentUsername = txtBruteUser.Text;
-            int targetLength = chkNoInfo.Checked ? 0 : (int)numLength.Value; // Використовуємо CheckBox замість RadioButton
-            bool exactLength = chkExactLength.Checked && !chkNoInfo.Checked; // Вимкнення точної довжини у режимі без інформації
+            // Clear previous state
+            txtBruteLog.Clear();
+            foundPassword = null;
+            bruteForceAttempts = 0;
+            currentIteration = 0;
 
-            // Формуємо набір символів для перебору
-            var charSets = new List<string>();
-            if (chkNoInfo.Checked ||
-        (!chkLowerLatin.Checked && !chkUpperLatin.Checked && !chkDigits.Checked &&
-         !chkSpecial.Checked && !chkCyrillic.Checked))
+            // Setup character sets
+            currentUsername = txtBruteUser.Text;
+            var charSets = BuildCharacterSets();
+            if (charSets.Count == 0)
             {
-                // Режим без інформації - всі символи
+                throw new ArgumentException("At least one character set must be selected");
+            }
+
+            // Calculate parameters
+            int targetLength = chkNoInfo.Checked ? 0 : (int)numLength.Value;
+            bool exactLength = chkExactLength.Checked && !chkNoInfo.Checked;
+            string chars = string.Join("", charSets);
+            totalIterations = exactLength ? (long)Math.Pow(chars.Length, targetLength) : 0;
+
+            // Initialize cancellation
+            cts?.Dispose();
+            cts = new CancellationTokenSource();
+            bruteForceStartTime = DateTime.Now;
+
+            // Setup UI
+            SetupBruteForceUI(exactLength, targetLength);
+        }
+
+        private List<string> BuildCharacterSets()
+        {
+            var charSets = new List<string>();
+
+            if (chkNoInfo.Checked || (!chkLowerLatin.Checked && !chkUpperLatin.Checked &&
+                !chkDigits.Checked && !chkSpecial.Checked && !chkCyrillic.Checked))
+            {
+                // Default character sets
                 charSets.Add("abcdefghijklmnopqrstuvwxyz");
                 charSets.Add("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
                 charSets.Add("0123456789");
                 charSets.Add("!@#$%^&*()_+-=[]{}|;:,.<>?");
-                charSets.Add("абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ");
+                charSets.Add("абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".Replace(" ", ""));
             }
             else
             {
-                // Режим з інформацією - тільки вибрані символи
-                if (this.chkLowerLatin.Checked)
-                    charSets.Add("abcdefghijklmnopqrstuvwxyz");
-                if (this.chkUpperLatin.Checked)
-                    charSets.Add("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-                if (this.chkDigits.Checked)
-                    charSets.Add("0123456789");
-                if (this.chkSpecial.Checked)
-                    charSets.Add("!@#$%^&*()_+-=[]{}|;:,.<>?");
-                if (this.chkCyrillic.Checked)
-                    charSets.Add("абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ");
+                // Selected character sets
+                if (chkLowerLatin.Checked) charSets.Add("abcdefghijklmnopqrstuvwxyz");
+                if (chkUpperLatin.Checked) charSets.Add("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                if (chkDigits.Checked) charSets.Add("0123456789");
+                if (chkSpecial.Checked) charSets.Add("!@#$%^&*()_+-=[]{}|;:,.<>?");
+                if (chkCyrillic.Checked)
+                    charSets.Add("абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".Replace(" ", ""));
             }
 
-            if (charSets.Count == 0)
-            {
-                MessageBox.Show("Please select at least one character set", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            return charSets;
+        }
 
-            string chars = string.Join("", charSets);
-            totalIterations = (long)Math.Pow(chars.Length, targetLength > 0 ? targetLength : 1); // Запобігаємо помилці при targetLength = 0
-            currentIteration = 0;
+        private void SetupBruteForceUI(bool exactLength, int targetLength)
+        {
+            progressBarBrute.Style = exactLength && targetLength <= 8 ?
+                ProgressBarStyle.Continuous : ProgressBarStyle.Marquee;
+            progressBarBrute.Value = 0;
+            lblProgress.Text = "";
+            lblBruteStatus.Text = "Status: In progress...";
+            btnStartBrute.Enabled = false;
+            btnStopBrute.Enabled = true;
 
-            if (targetLength > 8 || chkNoInfo.Checked)
-            {
-                progressBar.Style = ProgressBarStyle.Marquee;
-                progressBar.Maximum = 100;
-            }
-            else
-            {
-                progressBar.Style = ProgressBarStyle.Continuous;
-                progressBar.Minimum = 0;
-                progressBar.Maximum = 100;
-            }
-            progressBar.Value = 0;
-            lblProgress.Text = "0%";
-
+            progressTimer = new System.Threading.Timer(UpdateProgressUICallback, null, 1000, 1000);
             isBruteForceRunning = true;
-            bruteForceAttempts = 0;
-            foundPassword = null;
-            bruteForceStartTime = DateTime.Now;
+        }
 
-            this.btnStartBrute.Enabled = false;
-            this.btnStopBrute.Enabled = true;
-            lblStatus.Text = "Status: In progress...";
+        private void UpdateProgressUICallback(object state) => UpdateProgressUI();
+
+        private void StartBruteForceAttack()
+        {
+            int targetLength = chkNoInfo.Checked ? 0 : (int)numLength.Value;
+            bool exactLength = chkExactLength.Checked && !chkNoInfo.Checked;
+            var charSets = BuildCharacterSets();
+            string chars = string.Join("", charSets);
 
             Task.Run(() =>
             {
@@ -381,52 +406,221 @@ namespace TBD_Yaroshenko
                 {
                     if (exactLength && !chkNoInfo.Checked)
                     {
-                        BruteForceExactLength(currentUsername, chars, targetLength);
+                        ExecuteParallelBruteForce(currentUsername, chars, targetLength, cts.Token);
                     }
                     else
                     {
-                        BruteForceVariableLength(currentUsername, chars, targetLength);
+                        ExecuteVariableLengthBruteForce(currentUsername, chars, targetLength, cts.Token);
                     }
+                }
+                catch (OperationCanceledException)
+                {
+                    UpdateUI(() => lblBruteStatus.Text = "Status: Canceled by user");
                 }
                 catch (Exception ex)
                 {
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    });
+                    LogError($"Brute force error: {ex.Message}");
+                }
+                finally
+                {
+                    CompleteBruteForceOperation();
+                }
+            }, cts.Token);
+        }
+
+        private void ExecuteParallelBruteForce(string username, string chars, int length, CancellationToken ct)
+        {
+            long totalCombinations = (long)Math.Pow(chars.Length, length);
+            var partitions = PartitionRange(totalCombinations, Environment.ProcessorCount);
+
+            Parallel.ForEach(partitions, new ParallelOptions { CancellationToken = ct }, range =>
+            {
+                using (var connection = new SqlConnection(cs))
+                {
+                    connection.Open();
+                    BruteForceRange(username, chars, length, range, connection, ct);
+                }
+            });
+        }
+
+        private void BruteForceRange(string username, string chars, int length, Range range,
+                                   SqlConnection connection, CancellationToken ct)
+        {
+            var indices = new int[length];
+            var password = new char[length];
+            long localAttempts = 0;
+
+            for (long i = range.Start; i < range.End && !ct.IsCancellationRequested && foundPassword == null; i++)
+            {
+                // Convert number to character indices
+                long n = i;
+                for (int j = length - 1; j >= 0; j--)
+                {
+                    indices[j] = (int)(n % chars.Length);
+                    n /= chars.Length;
                 }
 
-                this.Invoke((MethodInvoker)delegate
+                // Build password from indices
+                for (int k = 0; k < length; k++)
+                {
+                    password[k] = chars[indices[k]];
+                }
+
+                // Update attempt counter
+                localAttempts++;
+                if (localAttempts % 1000000 == 0)
+                {
+                    Interlocked.Add(ref bruteForceAttempts, localAttempts);
+                    localAttempts = 0;
+                }
+
+                // Check password
+                if (CheckPassword(username, new string(password), connection))
+                {
+                    foundPassword = new string(password);
+                    cts.Cancel();
+                    break;
+                }
+            }
+
+            // Final counter update
+            Interlocked.Add(ref bruteForceAttempts, localAttempts);
+        }
+
+        private void ExecuteVariableLengthBruteForce(string username, string chars, int approximateLength, CancellationToken ct)
+        {
+            int[] lengths = approximateLength == 0 ?
+                Enumerable.Range(1, 5).ToArray() : // Default lengths if unknown
+                new[] { approximateLength - 1, approximateLength, approximateLength + 1 };
+
+            foreach (int len in lengths)
+            {
+                if (ct.IsCancellationRequested || foundPassword != null) break;
+                ExecuteParallelBruteForce(username, chars, len, ct);
+            }
+        }
+
+        private bool CheckPassword(string username, string password, SqlConnection connection)
+        {
+            try
+            {
+                using (var cmd = new SqlCommand("SELECT COUNT(*) FROM LOGIN_TBL WHERE USERNAME = @user AND PASS = @pass", connection))
+                {
+                    cmd.Parameters.AddWithValue("@user", username);
+                    cmd.Parameters.AddWithValue("@pass", password);
+                    return (int)cmd.ExecuteScalar() > 0;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private IEnumerable<Range> PartitionRange(long total, int partitions)
+        {
+            long chunkSize = total / partitions;
+            for (int i = 0; i < partitions; i++)
+            {
+                long start = i * chunkSize;
+                long end = (i == partitions - 1) ? total : start + chunkSize;
+                yield return new Range(start, end);
+            }
+        }
+
+        private void UpdateProgressUI()
+        {
+            if (!isBruteForceRunning) return;
+
+            Invoke((MethodInvoker)delegate
+            {
+                if (foundPassword != null)
+                {
+                    txtBruteLog.AppendText($"{DateTime.Now:HH:mm:ss}: Password found: {foundPassword}\n");
+                    txtBruteLog.ScrollToCaret();
+                }
+                else if (bruteForceAttempts > 0)
+                {
+                    double seconds = (DateTime.Now - bruteForceStartTime).TotalSeconds;
+                    double speed = bruteForceAttempts / seconds;
+                    lblProgress.Text = $"Attempts: {bruteForceAttempts:N0} | Speed: {speed:N0}/sec";
+
+                    if (totalIterations > 0)
+                    {
+                        int progress = (int)((currentIteration * 100) / totalIterations);
+                        progressBarBrute.Value = Math.Min(progress, 100);
+                    }
+                }
+            });
+        }
+
+        private void CompleteBruteForceOperation()
+        {
+            try
+            {
+                progressTimer?.Dispose();
+
+                UpdateUI(() =>
                 {
                     isBruteForceRunning = false;
                     btnStartBrute.Enabled = true;
                     btnStopBrute.Enabled = false;
-                    progressBar.Value = progressBar.Maximum;
-                    progressBar.Style = ProgressBarStyle.Continuous;
+                    progressBarBrute.Value = progressBarBrute.Maximum;
 
                     if (foundPassword != null)
                     {
-                        lblStatus.Text = $"Status: Found! Password: {foundPassword}";
-                        lblProgress.Text = "100%";
-                        MessageBox.Show($"Password found: {foundPassword}\nTime: {(DateTime.Now - bruteForceStartTime).TotalSeconds:F2} sec\nAttempts: {bruteForceAttempts}",
-                        "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        ShowSuccessMessage();
+                    }
+                    else if (cts?.IsCancellationRequested == true)
+                    {
+                        lblBruteStatus.Text = "Status: Canceled by user";
+                        lblProgress.Text = "Canceled";
                     }
                     else
                     {
-                        lblStatus.Text = "Status: Not Found";
-                        lblProgress.Text = "Completed";
-                        MessageBox.Show("Password not found with the specified parameters",
-                        "Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        ShowFailureMessage();
                     }
                 });
-            });
+            }
+            finally
+            {
+                cts?.Dispose();
+                cts = null;
+            }
+        }
+
+        private void ShowSuccessMessage()
+        {
+            lblBruteStatus.Text = $"Status: Found! Password: {foundPassword}";
+            lblProgress.Text = "100%";
+            MessageBox.Show($"Password found: {foundPassword}\nTime: {(DateTime.Now - bruteForceStartTime).TotalSeconds:F2} sec\nAttempts: {bruteForceAttempts:N0}",
+                "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void ShowFailureMessage()
+        {
+            lblBruteStatus.Text = "Status: Not Found";
+            lblProgress.Text = "Completed";
+            MessageBox.Show("Password not found with the specified parameters",
+                "Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void btnStopBrute_Click_1(object sender, EventArgs e)
+        {
+            if (isBruteForceRunning && cts != null)
+            {
+                cts.Cancel();
+                UpdateUI(() =>
+                {
+                    lblBruteStatus.Text = "Status: Stopping...";
+                    lblProgress.Text = "Please wait...";
+                });
+            }
         }
 
         private void chkNoInfo_CheckedChanged_1(object sender, EventArgs e)
         {
-            // Вмикаємо/вимикаємо інші елементи керування при зміні стану CheckBox
             bool noInfoMode = chkNoInfo.Checked;
-
             numLength.Enabled = !noInfoMode;
             chkExactLength.Enabled = !noInfoMode;
             chkLowerLatin.Enabled = !noInfoMode;
@@ -436,162 +630,78 @@ namespace TBD_Yaroshenko
             chkCyrillic.Enabled = !noInfoMode;
         }
 
-
-        private void btnStopBrute_Click_1(object sender, EventArgs e)
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            isBruteForceRunning = false;
-            this.btnStopBrute.Enabled = false;
-            this.lblBruteStatus.Text = "Status: Stopped by user";
-            this.progressBarBrute.Value = 0;
-            this.progressBarBrute.Style = ProgressBarStyle.Continuous;
-            this.lblProgress.Text = "Stopped";
+            if (isBruteForceRunning)
+            {
+                var result = MessageBox.Show("Brute force attack is still running. Cancel and exit?",
+                                           "Confirmation",
+                                           MessageBoxButtons.YesNo,
+                                           MessageBoxIcon.Question);
+
+                if (result == DialogResult.No)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+
+                cts?.Cancel();
+                Task.Delay(300).Wait();
+            }
+
+            CleanupResources();
+            base.OnFormClosing(e);
         }
 
-        private void BruteForceExactLength(string username, string chars, int length)
+        private void CleanupResources()
         {
-            var indices = new int[length];
-            var password = new char[length];
-
-            while (isBruteForceRunning && foundPassword == null)
-            {
-                // Генеруємо пароль
-                for (int i = 0; i < length; i++)
-                {
-                    password[i] = chars[indices[i]];
-                }
-
-                bruteForceAttempts++;
-                currentIteration++;
-
-                if (bruteForceAttempts % 10000 == 0)
-                {
-                    UpdateBruteLog(new string(password));
-                    UpdateProgressBar();
-                }
-
-                if (CheckPassword(username, new string(password)))
-                {
-                    foundPassword = new string(password);
-                    UpdateBruteLog($"Password found: {foundPassword}");
-                    break;
-                }
-
-                // Оновлюємо індекси
-                for (int i = length - 1; i >= 0; i--)
-                {
-                    if (indices[i] < chars.Length - 1)
-                    {
-                        indices[i]++;
-                        break;
-                    }
-                    indices[i] = 0;
-                }
-            }
+            progressTimer?.Dispose();
+            cts?.Dispose();
         }
 
-        private void BruteForceVariableLength(string username, string chars, int approximateLength)
+        private void HandleInitializationError(Exception ex)
         {
-            int[] lengths;
-
-            if (approximateLength == 0)
-            {
-                lengths = Enumerable.Range(1, 25).ToArray();
-            }
-            else
-            {
-                lengths = new[] { approximateLength - 1, approximateLength, approximateLength + 1 };
-            }
-
-            foreach (int len in lengths)
-            {
-                if (!isBruteForceRunning) break;
-                BruteForceRecursive(username, chars, len, "");
-                if (foundPassword != null) break;
-            }
+            MessageBox.Show($"Initialization error: {ex.Message}", "Error",
+                           MessageBoxButtons.OK, MessageBoxIcon.Error);
+            CompleteBruteForceOperation();
         }
 
-        private void BruteForceRecursive(string username, string chars, int length, string current)
+        private void LogError(string message)
         {
-            if (!isBruteForceRunning || foundPassword != null) return;
-
-            if (current.Length == length)
+            UpdateUI(() =>
             {
-                bruteForceAttempts++;
-                currentIteration++;
-
-                if (bruteForceAttempts % 1000 == 0)
-                {
-                    UpdateBruteLog(current);
-                    UpdateProgressBar();
-                }
-
-                if (CheckPassword(username, current))
-                {
-                    foundPassword = current;
-                    UpdateBruteLog($"Password found: {current}");
-                }
-            }
-            else
-            {
-                Parallel.ForEach(chars, (c, state) =>
-                {
-                    if (!isBruteForceRunning || foundPassword != null)
-                    {
-                        state.Break();
-                        return;
-                    }
-                    BruteForceRecursive(username, chars, length, current + c);
-                });
-            }
-        }
-
-        private void UpdateBruteLog(string attempt)
-        {
-            if (txtBruteLog.InvokeRequired)
-            {
-                txtBruteLog.BeginInvoke(new Action<string>(UpdateBruteLog), attempt);
-            }
-            else
-            {
-                txtBruteLog.AppendText($"{DateTime.Now:HH:mm:ss}: {attempt}\n");
+                txtBruteLog.AppendText($"{DateTime.Now:HH:mm:ss}: {message}\n");
                 txtBruteLog.ScrollToCaret();
-            }
+            });
         }
-        private void UpdateProgressBar()
+
+        private void UpdateUI(Action action)
         {
-            if (progressBarBrute.InvokeRequired)
+            if (InvokeRequired)
             {
-                progressBarBrute.Invoke(new Action(UpdateProgressBar));
+                Invoke((MethodInvoker)delegate { action(); });
             }
             else
             {
-                if (totalIterations > 0)
-                {
-                    int progress = (int)((currentIteration * 100) / totalIterations);
-                    progressBarBrute.Value = Math.Min(progress, 100);
-                }
+                action();
             }
         }
 
-        private bool CheckPassword(string username, string password)
+        private struct Range
         {
-            try
+            public long Start { get; }
+            public long End { get; }
+
+            public Range(long start, long end)
             {
-                using (var con = new SqlConnection(cs))
-                using (var cmd = new SqlCommand("SELECT COUNT(*) FROM LOGIN_TBL WHERE USERNAME = @user AND PASS = @pass", con))
-                {
-                    cmd.Parameters.AddWithValue("@user", username);
-                    cmd.Parameters.AddWithValue("@pass", password);
-                    con.Open();
-                    return (int)cmd.ExecuteScalar() > 0;
-                }
-            }
-            catch
-            {
-                return false;
+                Start = start;
+                End = end;
             }
         }
+
         #endregion
+
+
 
         #region Dictionary Attack
 
@@ -601,80 +711,183 @@ namespace TBD_Yaroshenko
         private List<string> dictionary;
         private HashSet<string> englishWords = new HashSet<string>();
 
-        // Завантаження англійського словника
+        // Клас для зберігання інформації про схожі паролі
+        public class SimilarPassword
+        {
+            public string Password { get; set; }
+            public string SimilarityType { get; set; }
+        }
+
+        // Фільтрує словник за заданими критеріями
+        private List<string> FilterDictionary(List<string> dictionary)
+        {
+            // Фільтруємо паролі довжиною від 3 символів
+            return dictionary.Where(p => p.Length >= 3).ToList();
+        }
+
+        // Асинхронно завантажує англійський словник
         private async Task LoadEnglishDictionaryAsync()
         {
             try
             {
                 if (!File.Exists(englishDictionaryPath))
                 {
+                    // Створюємо директорію, якщо її немає
                     string directory = Path.GetDirectoryName(englishDictionaryPath);
                     if (!Directory.Exists(directory))
                     {
                         Directory.CreateDirectory(directory);
                     }
-                    string[] defaultWords = { "hello", "world", "testing" };
+
+                    // Створюємо базовий словник за замовчуванням
+                    string[] defaultWords = { "hello", "world", "password", "admin", "test", "qwerty", "123456", "welcome" };
                     await File.WriteAllLinesAsync(englishDictionaryPath, defaultWords);
-                    MessageBox.Show($"Файл англійського словника не знайдено за шляхом: {englishDictionaryPath}. Створено новий файл із початковими словами.",
-                                   "Інформація", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     englishWords = new HashSet<string>(defaultWords.Select(w => w.ToLower()));
                     return;
                 }
 
+                // Читаємо та обробляємо словник
                 var lines = await File.ReadAllLinesAsync(englishDictionaryPath);
-                englishWords = new HashSet<string>(
-                    lines.Where(word => word.Length >= 3)
-                         .Select(word => word.Trim().ToLower())
-                );
+                var baseWords = lines.Where(word => !string.IsNullOrWhiteSpace(word) && word.Length >= 3)
+                                    .Select(word => word.Trim().ToLower())
+                                    .Distinct()
+                                    .ToList();
 
-                var commonVariations = englishWords
-         .Where(w => w.Length >= 3)
-         .SelectMany(w => new[]
-         {
-            w + "123",      // apple123
-            w + "!",        // apple!
-            w + "123!",      // apple123!
-            w + "love",     // applelove
-            w + "password", // applepassword
-            char.ToUpper(w[0]) + w.Substring(1), // Apple
-            w + w,          // appleapple
-            w + "1",         // apple1
-            w.Replace('e', '3') // appl3
-         })
-         .ToList();
-
-                foreach (var variation in commonVariations)
+                // Генеруємо варіації слів
+                var variations = new List<string>();
+                foreach (var word in baseWords)
                 {
-                    englishWords.Add(variation);
+                    variations.AddRange(GenerateCommonVariations(word));
                 }
 
-                // Діагностика: виведення вмісту englishWords
-                txtBruteLog.AppendText($"Завантажено englishWords: {string.Join(", ", englishWords)}\n");
+                englishWords = new HashSet<string>(baseWords.Concat(variations));
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Несподівана помилка під час завантаження англійського словника: {ex.Message}",
-                               "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error loading English dictionary: {ex.Message}");
                 englishWords = new HashSet<string>();
             }
         }
 
-        private List<string> ExtractEnglishWords(string password)
+        // Генерує поширені варіації заданого слова
+        private List<string> GenerateCommonVariations(string word)
         {
-            var words = Regex.Matches(password, @"([A-Z][a-z]+)|([a-z]+)")
-               .Cast<Match>()
-               .Select(m => m.Value.ToLower())
-               .ToList();
+            var variations = new List<string>();
 
-            // Додатковий пошук слів із великої літери
-            var capitalized = words.Select(w => char.ToUpper(w[0]) + w.Substring(1)).ToList();
-            words.AddRange(capitalized);
+            // Додаємо базові варіації
+            variations.Add(word + "123");
+            variations.Add(word + "!");
+            variations.Add(word + "123!");
+            variations.Add(word + "1");
+            variations.Add(word + "2023");
+            variations.Add(word + "@");
 
-            return words.Where(w => englishWords.Contains(w))
-                       .Distinct()
-                       .ToList();
+            // Варіація з великою літерою
+            if (word.Length > 0)
+            {
+                variations.Add(char.ToUpper(word[0]) + word.Substring(1));
+            }
+
+            // Leet speak варіація
+            variations.Add(word.Replace('a', '@').Replace('e', '3').Replace('i', '1').Replace('o', '0'));
+
+            // Подвоєння слова
+            variations.Add(word + word);
+
+            return variations;
         }
 
+        // Визначає тип схожості на основі оцінки
+        private string CalculateSimilarityType(double score)
+        {
+            return score switch
+            {
+                1.0 => "Exact match",
+                > 0.8 => "Very similar",
+                > 0.6 => "Similar",
+                > 0.4 => "Somewhat similar",
+                _ => "Weak similarity"
+            };
+        }
+
+        // Обчислює схожість між двома паролями
+        private double CalculateSimilarity(string realPassword, string testPassword)
+        {
+            if (string.IsNullOrEmpty(realPassword) || string.IsNullOrEmpty(testPassword))
+                return 0;
+
+            // Перевіряємо точний збіг
+            if (realPassword == testPassword) return 1.0;
+
+            // Перевіряємо збіг без урахування регістру
+            if (string.Equals(realPassword, testPassword, StringComparison.OrdinalIgnoreCase))
+                return 0.9;
+
+            // Обчислюємо схожість підрядків
+            double substringScore = CalculateSubstringSimilarity(realPassword, testPassword);
+
+            // Обчислюємо відстань Левенштейна
+            int maxLength = Math.Max(realPassword.Length, testPassword.Length);
+            int distance = LevenshteinDistance(realPassword, testPassword);
+            double levenshteinSimilarity = 1.0 - (double)distance / maxLength;
+
+            // Комбінуємо оцінки
+            double totalSimilarity = (substringScore * 0.5) + (levenshteinSimilarity * 0.5);
+            return Math.Round(totalSimilarity, 2);
+        }
+
+        // Обчислює схожість на основі спільних підрядків
+        private double CalculateSubstringSimilarity(string s1, string s2)
+        {
+            if (string.IsNullOrEmpty(s1) || string.IsNullOrEmpty(s2)) return 0;
+
+            string longer = s1.Length > s2.Length ? s1 : s2;
+            string shorter = s1.Length > s2.Length ? s2 : s1;
+
+            int maxLength = 0;
+            for (int i = 0; i < shorter.Length; i++)
+            {
+                for (int j = i + 1; j <= shorter.Length; j++)
+                {
+                    string substring = shorter.Substring(i, j - i);
+                    if (longer.Contains(substring) && substring.Length > maxLength)
+                    {
+                        maxLength = substring.Length;
+                    }
+                }
+            }
+
+            return (double)maxLength / longer.Length;
+        }
+
+        // Обчислює відстань Левенштейна між двома рядками
+        private int LevenshteinDistance(string s, string t)
+        {
+            if (string.IsNullOrEmpty(s)) return string.IsNullOrEmpty(t) ? 0 : t.Length;
+            if (string.IsNullOrEmpty(t)) return s.Length;
+
+            int[,] d = new int[s.Length + 1, t.Length + 1];
+
+            for (int i = 0; i <= s.Length; i++)
+                d[i, 0] = i;
+            for (int j = 0; j <= t.Length; j++)
+                d[0, j] = j;
+
+            for (int j = 1; j <= t.Length; j++)
+            {
+                for (int i = 1; i <= s.Length; i++)
+                {
+                    int cost = (s[i - 1] == t[j - 1]) ? 0 : 1;
+                    d[i, j] = Math.Min(
+                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                        d[i - 1, j - 1] + cost);
+                }
+            }
+
+            return d[s.Length, t.Length];
+        }
+
+        // Обробник кнопки запуску словникової атаки
         private async void btnStartDictionary_Click_1(object sender, EventArgs e)
         {
             if (isDictionaryAttackRunning) return;
@@ -682,23 +895,31 @@ namespace TBD_Yaroshenko
 
             if (string.IsNullOrWhiteSpace(txtBruteUser.Text))
             {
-                MessageBox.Show("Будь ласка, введіть ім'я користувача", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please enter a username", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            currentUsername = txtBruteUser.Text;
+            string realPassword = GetUserPasswordFromDB(currentUsername);
+
+            if (realPassword == null)
+            {
+                MessageBox.Show("User not found in database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             if (!File.Exists(dictionaryPath))
             {
-                MessageBox.Show("Файл словника не знайдено!", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Dictionary file not found!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
+            // Ініціалізація англійського словника, якщо ще не завантажено
             if (englishWords.Count == 0)
             {
                 await LoadEnglishDictionaryAsync();
-                txtBruteLog.AppendText($"Завантажено англійський словник із {englishWords.Count} словами\n");
             }
 
-            currentUsername = txtBruteUser.Text;
             isDictionaryAttackRunning = true;
             foundPassword = null;
             bruteForceStartTime = DateTime.Now;
@@ -706,55 +927,60 @@ namespace TBD_Yaroshenko
 
             this.btnStartDictionary.Enabled = false;
             this.btnStopDictionary.Enabled = true;
-            lblBruteStatus.Text = "Статус: Словникова атака в процесі...";
+            lblBruteStatus.Text = "Status: Dictionary attack in progress...";
 
             await Task.Run(() =>
             {
                 try
                 {
-                    dictionary = File.ReadAllLines(dictionaryPath).ToList();
+                    dictionary = File.ReadAllLines(dictionaryPath)
+                                    .Where(line => !string.IsNullOrWhiteSpace(line))
+                                    .ToList();
+
                     var filteredDictionary = FilterDictionary(dictionary);
 
-                    txtBruteLog.Invoke((MethodInvoker)delegate
-                    {
-                        txtBruteLog.AppendText($"Завантажено словник із {dictionary.Count} записів\n");
-                        txtBruteLog.AppendText($"Після фільтрації: {filteredDictionary.Count} кандидатів\n");
-                    });
+                    UpdateBruteLog($"Loaded dictionary: {dictionary.Count} entries");
+                    UpdateBruteLog($"After filtering: {filteredDictionary.Count} candidates");
+                    UpdateBruteLog($"Analyzing password: {realPassword}");
 
-                    List<string> similarPasswords = new List<string>();
+                    var similarPasswords = new ConcurrentBag<SimilarPassword>();
                     bool exactMatchFound = false;
 
-                    foreach (var password in filteredDictionary)
+                    // Паралельна обробка словника
+                    Parallel.ForEach(filteredDictionary, (password, state) =>
                     {
-                        if (!isDictionaryAttackRunning) break;
-
-                        bruteForceAttempts++;
-
-                        if (bruteForceAttempts % 1000 == 0)
+                        if (!isDictionaryAttackRunning || exactMatchFound)
                         {
-                            UpdateBruteLog($"Спроба: {password}");
+                            state.Stop();
+                            return;
                         }
+
+                        Interlocked.Increment(ref bruteForceAttempts);
 
                         if (CheckPassword(currentUsername, password))
                         {
                             foundPassword = password;
                             exactMatchFound = true;
-                            UpdateBruteLog($"Знайдено пароль: {password}");
-                            break;
+                            UpdateBruteLog($"Found exact match: {password}");
+                            state.Stop();
+                            return;
                         }
-                        else
+
+                        var similarityScore = CalculateSimilarity(realPassword, password);
+                        if (similarityScore > 0.3)
                         {
-                            var similarityScore = CalculateSimilarity("apple pie love password", password);
-                            txtBruteLog.Invoke((MethodInvoker)delegate
+                            similarPasswords.Add(new SimilarPassword
                             {
-                                txtBruteLog.AppendText($"Пароль: {password}, Схожість: {similarityScore:F2}\n");
+                                Password = password,
+                                SimilarityType = CalculateSimilarityType(similarityScore)
                             });
-                            if (similarityScore > 0)
-                            {
-                                similarPasswords.Add($"{password} (схожість: {similarityScore:F2})");
-                            }
                         }
-                    }
+
+                        if (bruteForceAttempts % 10000 == 0)
+                        {
+                            UpdateBruteLog($"Checked {bruteForceAttempts} passwords...");
+                        }
+                    });
 
                     this.Invoke((MethodInvoker)delegate
                     {
@@ -764,27 +990,13 @@ namespace TBD_Yaroshenko
 
                         if (exactMatchFound)
                         {
-                            lblBruteStatus.Text = $"Статус: Знайдено! Пароль: {foundPassword}";
-                            MessageBox.Show($"Пароль знайдено: {foundPassword}\nЧас: {(DateTime.Now - bruteForceStartTime).TotalSeconds:F2} сек\nСпроби: {bruteForceAttempts}",
-                                "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            lblBruteStatus.Text = $"Status: Found! Password: {foundPassword}";
+                            MessageBox.Show($"Password found: {foundPassword}\nTime: {(DateTime.Now - bruteForceStartTime).TotalSeconds:F2} sec\nAttempts: {bruteForceAttempts}",
+                                "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
                         {
-                            lblBruteStatus.Text = "Статус: Не знайдено";
-                            txtBruteLog.AppendText($"Знайдено {similarPasswords.Count} подібних паролів\n");
-
-                            if (similarPasswords.Any())
-                            {
-                                var topSimilar = similarPasswords.Take(10).ToList();
-                                string similarList = string.Join("\n", topSimilar);
-                                MessageBox.Show($"Точний пароль не знайдено, але ось схожі паролі:\n\n{similarList}",
-                                    "Подібні паролі", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            }
-                            else
-                            {
-                                MessageBox.Show("Пароль не знайдено в словнику, і подібних паролів також немає",
-                                    "Результат", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            }
+                            ShowSimilarPasswordsReport(realPassword, similarPasswords.ToList());
                         }
                     });
                 }
@@ -792,103 +1004,131 @@ namespace TBD_Yaroshenko
                 {
                     this.Invoke((MethodInvoker)delegate
                     {
-                        MessageBox.Show($"Помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        isDictionaryAttackRunning = false;
+                        btnStartDictionary.Enabled = true;
+                        btnStopDictionary.Enabled = false;
+                        MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     });
                 }
             });
         }
-        private double CalculateSimilarity(string targetPassword, string testPassword)
+
+        // Показує звіт про схожі паролі
+        private void ShowSimilarPasswordsReport(string realPassword, List<SimilarPassword> similarPasswords)
         {
-            var targetWords = ExtractEnglishWords(targetPassword);
-            var testWords = ExtractEnglishWords(testPassword);
+            lblBruteStatus.Text = "Status: Exact match not found";
 
-            if (targetWords.Count == 0 || testWords.Count == 0)
-                return 0;
-
-            // Додаємо пошук часткових збігів (наприклад, "appl" vs "apple")
-            double score = 0;
-            foreach (var tw in targetWords)
+            if (!similarPasswords.Any())
             {
-                foreach (var pw in testWords)
-                {
-                    if (tw.Contains(pw) || pw.Contains(tw))
-                    {
-                        score += (double)Math.Min(tw.Length, pw.Length) / Math.Max(tw.Length, pw.Length);
-                    }
-                }
+                UpdateBruteLog("No similar passwords found");
+                MessageBox.Show("No passwords similar to the original were found", "Result",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
             }
 
-            return score / Math.Max(targetWords.Count, testWords.Count);
-        }
-
-        private List<string> FindSimilarPasswords(string targetPassword, List<string> passwordDictionary, int maxResults = 20)
-        {
-            var targetWords = ExtractEnglishWords(targetPassword);
-            if (targetWords.Count == 0) return new List<string>();
-
-            var similarPasswords = new Dictionary<string, int>();
-            var targetWordsSet = new HashSet<string>(targetWords);
-
-            foreach (var password in passwordDictionary)
-            {
-                if (similarPasswords.Count >= maxResults * 5) break;
-
-                var commonWords = ExtractEnglishWords(password)
-                    .Count(w => targetWordsSet.Contains(w));
-
-                if (commonWords > 0)
-                {
-                    similarPasswords[password] = commonWords;
-                }
-            }
-
-            return similarPasswords
-                .OrderByDescending(p => p.Value)
-                .ThenBy(p => p.Key.Length)
-                .Take(maxResults)
-                .Select(p => p.Key)
+            // Групуємо та сортуємо результати
+            var topSimilar = similarPasswords
+                .GroupBy(p => p.Password)
+                .Select(g => g.First())
+                .OrderByDescending(p => p.SimilarityType)
+                .Take(10)
                 .ToList();
+
+            // Формуємо звіт
+            var report = new StringBuilder();
+            report.AppendLine("Password Similarity Analysis");
+            report.AppendLine($"User: {currentUsername}");
+            report.AppendLine($"Original password: {realPassword}");
+            report.AppendLine($"\nTop 10 similar passwords:");
+
+            foreach (var item in topSimilar)
+            {
+                report.AppendLine($"- {item.Password} ({item.SimilarityType})");
+            }
+
+            report.AppendLine($"\nAnalysis time: {(DateTime.Now - bruteForceStartTime).TotalSeconds:F2} sec");
+            report.AppendLine($"Passwords checked: {bruteForceAttempts:N0}");
+
+            UpdateBruteLog(report.ToString());
+
+            // Показуємо результат
+            MessageBox.Show(report.ToString(), "Similarity Analysis Results",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private List<string> FilterDictionary(List<string> dictionary)
+        // Оновлює лог атаки
+        private void UpdateBruteLog(string message)
         {
-            if (chkNoInfo.Checked) return dictionary;
-
-            IEnumerable<string> filtered = dictionary;
-
-            if (chkExactLength.Checked)
+            if (txtBruteLog.InvokeRequired)
             {
-                int length = (int)numLength.Value;
-                filtered = filtered.Where(p => p.Length == length);
+                txtBruteLog.Invoke((MethodInvoker)delegate
+                {
+                    txtBruteLog.AppendText($"{DateTime.Now:HH:mm:ss}: {message}\n");
+                    txtBruteLog.ScrollToCaret();
+                });
             }
             else
             {
-                int approxLength = (int)numLength.Value;
-                filtered = filtered.Where(p => p.Length >= approxLength - 1 && p.Length <= approxLength + 1);
+                txtBruteLog.AppendText($"{DateTime.Now:HH:mm:ss}: {message}\n");
+                txtBruteLog.ScrollToCaret();
             }
-
-            var charSets = new List<string>();
-            if (chkLowerLatin.Checked) charSets.Add("abcdefghijklmnopqrstuvwxyz");
-            if (chkUpperLatin.Checked) charSets.Add("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-            if (chkDigits.Checked) charSets.Add("0123456789");
-            if (chkSpecial.Checked) charSets.Add("!@#$%^&*()_+-=[]{}|;:,.<>?");
-            if (chkCyrillic.Checked) charSets.Add("абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ");
-
-            if (charSets.Any())
-            {
-                filtered = filtered.Where(p => p.All(c => charSets.Any(set => set.Contains(c))));
-            }
-
-            return filtered.ToList();
         }
 
+        // Отримує пароль користувача з бази даних
+        private string GetUserPasswordFromDB(string username)
+        {
+            try
+            {
+                using (var con = new SqlConnection(cs))
+                {
+                    con.Open();
+                    using (var cmd = new SqlCommand("SELECT PASS FROM LOGIN_TBL WHERE USERNAME = @user", con))
+                    {
+                        cmd.Parameters.AddWithValue("@user", username);
+                        var result = cmd.ExecuteScalar();
+                        return result?.ToString();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error retrieving password: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+
+        // Обробник кнопки зупинки атаки
         private void btnStopDictionary_Click(object sender, EventArgs e)
         {
             isDictionaryAttackRunning = false;
-            this.btnStopDictionary.Enabled = false;
-            this.lblBruteStatus.Text = "Status: Dictionary attack stopped";
+            btnStopDictionary.Enabled = false;
+            lblBruteStatus.Text = "Status: Dictionary attack stopped";
+        }
+
+        // Перевіряє пароль у базі даних
+        private bool CheckPassword(string username, string password)
+        {
+            try
+            {
+                using (var con = new SqlConnection(cs))
+                {
+                    con.Open();
+                    using (var cmd = new SqlCommand("SELECT COUNT(*) FROM LOGIN_TBL WHERE USERNAME = @user AND PASS = @pass", con))
+                    {
+                        cmd.Parameters.AddWithValue("@user", username);
+                        cmd.Parameters.AddWithValue("@pass", password);
+                        return (int)cmd.ExecuteScalar() > 0;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         #endregion
+
+        
     }
 }

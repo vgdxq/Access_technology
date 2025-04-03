@@ -539,5 +539,7 @@ namespace TBD_Yaroshenko
             _currentImage?.Dispose();
             base.OnFormClosing(e);
         }
+
+      
     }
 }

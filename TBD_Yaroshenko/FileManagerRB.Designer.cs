@@ -42,14 +42,15 @@
             // labelAccessTime
             // 
             labelAccessTime.AutoSize = true;
-            labelAccessTime.Location = new Point(45, 383);
+            labelAccessTime.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
+            labelAccessTime.Location = new Point(29, 359);
             labelAccessTime.Name = "labelAccessTime";
             labelAccessTime.Size = new Size(0, 15);
             labelAccessTime.TabIndex = 11;
             // 
             // textBoxFileContent
             // 
-            textBoxFileContent.Location = new Point(337, 52);
+            textBoxFileContent.Location = new Point(321, 28);
             textBoxFileContent.Name = "textBoxFileContent";
             textBoxFileContent.ReadOnly = true;
             textBoxFileContent.ScrollBars = RichTextBoxScrollBars.Vertical;
@@ -60,8 +61,8 @@
             // 
             // btnSave
             // 
-            btnSave.Font = new Font("SimSun", 10.8F);
-            btnSave.Location = new Point(570, 332);
+            btnSave.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
+            btnSave.Location = new Point(554, 308);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(106, 26);
             btnSave.TabIndex = 9;
@@ -71,8 +72,8 @@
             // 
             // buttonRotate
             // 
-            buttonRotate.Font = new Font("SimSun", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            buttonRotate.Location = new Point(414, 332);
+            buttonRotate.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
+            buttonRotate.Location = new Point(398, 308);
             buttonRotate.Name = "buttonRotate";
             buttonRotate.Size = new Size(106, 26);
             buttonRotate.TabIndex = 8;
@@ -83,7 +84,7 @@
             // pictureBox
             // 
             pictureBox.BackColor = Color.Transparent;
-            pictureBox.Location = new Point(337, 52);
+            pictureBox.Location = new Point(321, 28);
             pictureBox.Name = "pictureBox";
             pictureBox.Size = new Size(428, 274);
             pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
@@ -93,12 +94,12 @@
             // 
             // listBoxFiles
             // 
-            listBoxFiles.Font = new Font("SimSun", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            listBoxFiles.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             listBoxFiles.FormattingEnabled = true;
-            listBoxFiles.ItemHeight = 14;
-            listBoxFiles.Location = new Point(36, 52);
+            listBoxFiles.ItemHeight = 15;
+            listBoxFiles.Location = new Point(20, 28);
             listBoxFiles.Name = "listBoxFiles";
-            listBoxFiles.Size = new Size(295, 270);
+            listBoxFiles.Size = new Size(295, 259);
             listBoxFiles.TabIndex = 6;
             listBoxFiles.SelectedIndexChanged += listBoxFiles_SelectedIndexChanged;
             // 
@@ -110,7 +111,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(780, 407);
             Controls.Add(labelAccessTime);
             Controls.Add(textBoxFileContent);
             Controls.Add(btnSave);

@@ -59,6 +59,7 @@
             SettingMenu.Controls.Add(label1);
             SettingMenu.Controls.Add(comboBox_Files);
             SettingMenu.Controls.Add(comboBox_Users);
+            SettingMenu.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             SettingMenu.Location = new Point(12, 74);
             SettingMenu.Name = "SettingMenu";
             SettingMenu.Size = new Size(357, 214);
@@ -89,7 +90,7 @@
             checkBox_Execute.AutoSize = true;
             checkBox_Execute.Location = new Point(233, 96);
             checkBox_Execute.Name = "checkBox_Execute";
-            checkBox_Execute.Size = new Size(66, 19);
+            checkBox_Execute.Size = new Size(65, 19);
             checkBox_Execute.TabIndex = 13;
             checkBox_Execute.Text = "Execute";
             checkBox_Execute.UseVisualStyleBackColor = true;
@@ -109,7 +110,7 @@
             checkBox_Reading.AutoSize = true;
             checkBox_Reading.Location = new Point(233, 46);
             checkBox_Reading.Name = "checkBox_Reading";
-            checkBox_Reading.Size = new Size(69, 19);
+            checkBox_Reading.Size = new Size(70, 19);
             checkBox_Reading.TabIndex = 11;
             checkBox_Reading.Text = "Reading";
             checkBox_Reading.UseVisualStyleBackColor = true;
@@ -160,6 +161,7 @@
             // 
             // button_LogOut
             // 
+            button_LogOut.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             button_LogOut.Location = new Point(12, 404);
             button_LogOut.Name = "button_LogOut";
             button_LogOut.Size = new Size(137, 23);
@@ -170,6 +172,7 @@
             // 
             // button_FileManager
             // 
+            button_FileManager.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             button_FileManager.Location = new Point(22, 30);
             button_FileManager.Name = "button_FileManager";
             button_FileManager.Size = new Size(137, 23);

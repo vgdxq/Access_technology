@@ -79,40 +79,41 @@
             // menuStrip1
             // 
             menuStrip1.BackColor = SystemColors.Control;
+            menuStrip1.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             menuStrip1.ImageScalingSize = new Size(20, 20);
             menuStrip1.Items.AddRange(new ToolStripItem[] { довідкаToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Padding = new Padding(5, 2, 0, 2);
-            menuStrip1.Size = new Size(624, 24);
+            menuStrip1.Size = new Size(730, 24);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
             // довідкаToolStripMenuItem
             // 
-            довідкаToolStripMenuItem.Font = new Font("SimSun", 10.8F);
+            довідкаToolStripMenuItem.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             довідкаToolStripMenuItem.Name = "довідкаToolStripMenuItem";
-            довідкаToolStripMenuItem.Size = new Size(51, 20);
+            довідкаToolStripMenuItem.Size = new Size(39, 20);
             довідкаToolStripMenuItem.Text = "Info";
             довідкаToolStripMenuItem.Click += довідкаToolStripMenuItem_Click;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Font = new Font("SimSun", 10.8F);
+            label1.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             label1.Location = new Point(20, 41);
             label1.Name = "label1";
-            label1.Size = new Size(47, 15);
+            label1.Size = new Size(36, 15);
             label1.TabIndex = 1;
             label1.Text = "Login";
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Font = new Font("SimSun", 10.8F);
+            label2.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             label2.Location = new Point(20, 72);
             label2.Name = "label2";
-            label2.Size = new Size(71, 15);
+            label2.Size = new Size(57, 15);
             label2.TabIndex = 2;
             label2.Text = "Password";
             // 
@@ -135,7 +136,7 @@
             // 
             // button1
             // 
-            button1.Font = new Font("SimSun", 10.8F);
+            button1.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             button1.Location = new Point(0, 165);
             button1.Margin = new Padding(3, 2, 3, 2);
             button1.Name = "button1";
@@ -165,6 +166,7 @@
             groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(label2);
             groupBox1.Controls.Add(textBox1);
+            groupBox1.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             groupBox1.Location = new Point(10, 23);
             groupBox1.Margin = new Padding(3, 2, 3, 2);
             groupBox1.Name = "groupBox1";
@@ -175,7 +177,7 @@
             // 
             // button2
             // 
-            button2.Font = new Font("SimSun", 10.8F);
+            button2.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             button2.Location = new Point(0, 131);
             button2.Margin = new Padding(3, 2, 3, 2);
             button2.Name = "button2";
@@ -188,18 +190,18 @@
             // checkBox2
             // 
             checkBox2.AutoSize = true;
-            checkBox2.Font = new Font("SimSun", 10.8F);
+            checkBox2.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             checkBox2.Location = new Point(6, 102);
             checkBox2.Margin = new Padding(3, 2, 3, 2);
             checkBox2.Name = "checkBox2";
-            checkBox2.Size = new Size(146, 19);
+            checkBox2.Size = new Size(113, 19);
             checkBox2.TabIndex = 5;
             checkBox2.Text = "Strong password";
             checkBox2.UseVisualStyleBackColor = true;
             // 
             // button3
             // 
-            button3.Font = new Font("SimSun", 10.8F);
+            button3.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             button3.Location = new Point(0, 200);
             button3.Margin = new Padding(3, 2, 3, 2);
             button3.Name = "button3";
@@ -212,11 +214,11 @@
             // checkBox1
             // 
             checkBox1.AutoSize = true;
-            checkBox1.Font = new Font("SimSun", 10.8F);
+            checkBox1.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             checkBox1.Location = new Point(156, 102);
             checkBox1.Margin = new Padding(3, 2, 3, 2);
             checkBox1.Name = "checkBox1";
-            checkBox1.Size = new Size(130, 19);
+            checkBox1.Size = new Size(107, 19);
             checkBox1.TabIndex = 3;
             checkBox1.Text = "Show password";
             checkBox1.UseVisualStyleBackColor = true;
@@ -226,6 +228,7 @@
             // 
             panel1.Controls.Add(label3);
             panel1.Controls.Add(comboBoxAccessControl);
+            panel1.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             panel1.Location = new Point(10, 266);
             panel1.Name = "panel1";
             panel1.Size = new Size(302, 103);
@@ -236,7 +239,7 @@
             label3.AutoSize = true;
             label3.Location = new Point(17, 17);
             label3.Name = "label3";
-            label3.Size = new Size(229, 15);
+            label3.Size = new Size(225, 15);
             label3.TabIndex = 3;
             label3.Text = "Please select the type of access restriction:";
             // 
@@ -270,12 +273,13 @@
             groupBoxBruteForce.Controls.Add(numLength);
             groupBoxBruteForce.Controls.Add(lblBruteUser);
             groupBoxBruteForce.Controls.Add(txtBruteUser);
+            groupBoxBruteForce.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             groupBoxBruteForce.Location = new Point(355, 23);
             groupBoxBruteForce.Name = "groupBoxBruteForce";
-            groupBoxBruteForce.Size = new Size(246, 426);
+            groupBoxBruteForce.Size = new Size(362, 426);
             groupBoxBruteForce.TabIndex = 5;
             groupBoxBruteForce.TabStop = false;
-            groupBoxBruteForce.Text = "Brute Force Password Cracker";
+            groupBoxBruteForce.Text = "Password Cracker";
             // 
             // btnStopDictionary
             // 
@@ -302,7 +306,7 @@
             chkNoInfo.AutoSize = true;
             chkNoInfo.Location = new Point(9, 256);
             chkNoInfo.Name = "chkNoInfo";
-            chkNoInfo.Size = new Size(153, 19);
+            chkNoInfo.Size = new Size(151, 19);
             chkNoInfo.TabIndex = 18;
             chkNoInfo.Text = "No info about password";
             chkNoInfo.UseVisualStyleBackColor = true;
@@ -313,7 +317,7 @@
             lblBruteStatus.AutoSize = true;
             lblBruteStatus.Location = new Point(7, 405);
             lblBruteStatus.Name = "lblBruteStatus";
-            lblBruteStatus.Size = new Size(39, 15);
+            lblBruteStatus.Size = new Size(40, 15);
             lblBruteStatus.TabIndex = 16;
             lblBruteStatus.Text = "Status";
             // 
@@ -331,9 +335,8 @@
             lblProgress.AutoSize = true;
             lblProgress.Location = new Point(156, 358);
             lblProgress.Name = "lblProgress";
-            lblProgress.Size = new Size(23, 15);
+            lblProgress.Size = new Size(0, 15);
             lblProgress.TabIndex = 14;
-            lblProgress.Text = "0%";
             // 
             // progressBarBrute
             // 
@@ -369,7 +372,7 @@
             chkDigits.CheckState = CheckState.Checked;
             chkDigits.Location = new Point(9, 168);
             chkDigits.Name = "chkDigits";
-            chkDigits.Size = new Size(84, 19);
+            chkDigits.Size = new Size(85, 19);
             chkDigits.TabIndex = 9;
             chkDigits.Text = "Digits (0-9)";
             chkDigits.UseVisualStyleBackColor = true;
@@ -391,7 +394,7 @@
             chkUpperLatin.CheckState = CheckState.Checked;
             chkUpperLatin.Location = new Point(9, 143);
             chkUpperLatin.Name = "chkUpperLatin";
-            chkUpperLatin.Size = new Size(141, 19);
+            chkUpperLatin.Size = new Size(142, 19);
             chkUpperLatin.TabIndex = 8;
             chkUpperLatin.Text = "Uppercase Latin (A-Z)";
             chkUpperLatin.UseVisualStyleBackColor = true;
@@ -403,7 +406,7 @@
             chkSpecial.CheckState = CheckState.Checked;
             chkSpecial.Location = new Point(9, 193);
             chkSpecial.Name = "chkSpecial";
-            chkSpecial.Size = new Size(163, 19);
+            chkSpecial.Size = new Size(166, 19);
             chkSpecial.TabIndex = 7;
             chkSpecial.Text = "Special Characters (!@#...)";
             chkSpecial.UseVisualStyleBackColor = true;
@@ -415,7 +418,7 @@
             chkLowerLatin.CheckState = CheckState.Checked;
             chkLowerLatin.Location = new Point(9, 118);
             chkLowerLatin.Name = "chkLowerLatin";
-            chkLowerLatin.Size = new Size(137, 19);
+            chkLowerLatin.Size = new Size(138, 19);
             chkLowerLatin.TabIndex = 6;
             chkLowerLatin.Text = "Lowercase Latin (a-z)";
             chkLowerLatin.UseVisualStyleBackColor = true;
@@ -425,7 +428,7 @@
             lblCharSets.AutoSize = true;
             lblCharSets.Location = new Point(9, 95);
             lblCharSets.Name = "lblCharSets";
-            lblCharSets.Size = new Size(85, 15);
+            lblCharSets.Size = new Size(86, 15);
             lblCharSets.TabIndex = 5;
             lblCharSets.Text = "Character Sets:";
             // 
@@ -481,7 +484,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ButtonFace;
-            ClientSize = new Size(624, 461);
+            ClientSize = new Size(730, 461);
             Controls.Add(groupBoxBruteForce);
             Controls.Add(panel1);
             Controls.Add(groupBox1);
@@ -540,11 +543,11 @@
         private Button btnStartBrute;
         private Button btnStopBrute;
         private ProgressBar progressBarBrute;
-        private Label lblProgress;
         private TextBox txtBruteLog;
         private Label lblBruteStatus;
         private CheckBox chkNoInfo;
         private Button btnStopDictionary;
         private Button btnStartDictionary;
+        private Label lblProgress;
     }
 }

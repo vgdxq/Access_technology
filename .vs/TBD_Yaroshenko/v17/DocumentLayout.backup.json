@@ -3,32 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\mainwind_rolebased.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\mainwind_rolebased.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\loginregister.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\loginregister.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\tbd_yaroshenko\\loginregister.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\loginregister.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\loginregister.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\filemanagerrb.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\filemanagerrb.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\filemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\filemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\mainwind.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\mainwind.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
-      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\loginregister.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\loginregister.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|c:\\users\\\u044F\u0440\u0438\u043D\u0430\\desktop\\nau2025\\tbd_yaroshenko\\tbd_yaroshenko\\tbd_yaroshenko\\loginregister.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{45C55F9C-D28C-4982-BCBF-0F2BAC5B295A}|TBD_Yaroshenko\\TBD_Yaroshenko.csproj|solutionrelative:tbd_yaroshenko\\loginregister.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -38,72 +22,32 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "App.config",
-              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\App.config",
-              "RelativeDocumentMoniker": "TBD_Yaroshenko\\App.config",
-              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\App.config",
-              "RelativeToolTip": "TBD_Yaroshenko\\App.config",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAQAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
-              "WhenOpened": "2025-03-27T17:27:19.332Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "MainWind_RoleBased.cs",
-              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\MainWind_RoleBased.cs",
-              "RelativeDocumentMoniker": "TBD_Yaroshenko\\MainWind_RoleBased.cs",
-              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\MainWind_RoleBased.cs",
-              "RelativeToolTip": "TBD_Yaroshenko\\MainWind_RoleBased.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAfAAAAAAAAAA==",
+              "Title": "LoginRegister.cs",
+              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\LoginRegister.cs",
+              "RelativeDocumentMoniker": "TBD_Yaroshenko\\LoginRegister.cs",
+              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\LoginRegister.cs",
+              "RelativeToolTip": "TBD_Yaroshenko\\LoginRegister.cs",
+              "ViewState": "AgIAAD8EAAAAAAAAAAAswGwEAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-27T20:41:41.9Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "MainWind.cs",
-              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\MainWind.cs",
-              "RelativeDocumentMoniker": "TBD_Yaroshenko\\MainWind.cs",
-              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\MainWind.cs",
-              "RelativeToolTip": "TBD_Yaroshenko\\MainWind.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-27T20:38:24.123Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "FileManager.cs",
-              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\FileManager.cs",
-              "RelativeDocumentMoniker": "TBD_Yaroshenko\\FileManager.cs",
-              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\FileManager.cs",
-              "RelativeToolTip": "TBD_Yaroshenko\\FileManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAfAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-27T20:37:51.412Z",
+              "WhenOpened": "2025-04-03T09:14:16.117Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "FileManagerRB.cs",
-              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\FileManagerRB.cs",
-              "RelativeDocumentMoniker": "TBD_Yaroshenko\\FileManagerRB.cs",
-              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\FileManagerRB.cs",
-              "RelativeToolTip": "TBD_Yaroshenko\\FileManagerRB.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAhAAAAAAAAAA==",
+              "Title": "LoginRegister.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\LoginRegister.Designer.cs",
+              "RelativeDocumentMoniker": "TBD_Yaroshenko\\LoginRegister.Designer.cs",
+              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\LoginRegister.Designer.cs",
+              "RelativeToolTip": "TBD_Yaroshenko\\LoginRegister.Designer.cs",
+              "ViewState": "AgIAAPsAAAAAAAAAAAAAwBkBAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-27T20:36:10.66Z",
+              "WhenOpened": "2025-04-02T19:22:51.621Z",
               "EditorCaption": ""
             },
             {
@@ -117,19 +61,6 @@
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-03-27T17:37:18.733Z",
               "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "LoginRegister.cs",
-              "DocumentMoniker": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\LoginRegister.cs",
-              "RelativeDocumentMoniker": "TBD_Yaroshenko\\LoginRegister.cs",
-              "ToolTip": "C:\\Users\\\u042F\u0440\u0438\u043D\u0430\\Desktop\\NAU2025\\TBD_Yaroshenko\\TBD_Yaroshenko\\TBD_Yaroshenko\\LoginRegister.cs",
-              "RelativeToolTip": "TBD_Yaroshenko\\LoginRegister.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAfAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-26T14:33:28.034Z",
-              "EditorCaption": ""
             }
           ]
         }

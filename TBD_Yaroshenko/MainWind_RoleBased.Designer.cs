@@ -42,9 +42,9 @@
             button_FileManager = new Button();
             button_FileSet = new Button();
             groupBox_Files = new GroupBox();
+            button_SaveAccessRights = new Button();
             button_RefreshFiles = new Button();
             dataGridView_AccessRights = new DataGridView();
-            button_SaveAccessRights = new Button();
             SettingMenu.SuspendLayout();
             groupBox_Files.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView_AccessRights).BeginInit();
@@ -56,6 +56,7 @@
             SettingMenu.Controls.Add(comboBox_UserRole);
             SettingMenu.Controls.Add(label1);
             SettingMenu.Controls.Add(comboBox_Users);
+            SettingMenu.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             SettingMenu.Location = new Point(286, 28);
             SettingMenu.Name = "SettingMenu";
             SettingMenu.Size = new Size(222, 199);
@@ -136,6 +137,7 @@
             // 
             // button_LogOut
             // 
+            button_LogOut.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             button_LogOut.Location = new Point(51, 394);
             button_LogOut.Name = "button_LogOut";
             button_LogOut.Size = new Size(125, 23);
@@ -146,6 +148,7 @@
             // 
             // button_Settings
             // 
+            button_Settings.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             button_Settings.Location = new Point(30, 72);
             button_Settings.Name = "button_Settings";
             button_Settings.Size = new Size(135, 23);
@@ -156,6 +159,7 @@
             // 
             // button_FileManager
             // 
+            button_FileManager.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             button_FileManager.Location = new Point(30, 43);
             button_FileManager.Name = "button_FileManager";
             button_FileManager.Size = new Size(137, 23);
@@ -166,6 +170,7 @@
             // 
             // button_FileSet
             // 
+            button_FileSet.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             button_FileSet.Location = new Point(30, 101);
             button_FileSet.Name = "button_FileSet";
             button_FileSet.Size = new Size(135, 23);
@@ -183,12 +188,23 @@
             groupBox_Files.Controls.Add(comboBox_NewFileLevel);
             groupBox_Files.Controls.Add(comboBox_Files);
             groupBox_Files.Controls.Add(label2);
+            groupBox_Files.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             groupBox_Files.Location = new Point(514, 28);
             groupBox_Files.Name = "groupBox_Files";
             groupBox_Files.Size = new Size(274, 418);
             groupBox_Files.TabIndex = 13;
             groupBox_Files.TabStop = false;
             groupBox_Files.Visible = false;
+            // 
+            // button_SaveAccessRights
+            // 
+            button_SaveAccessRights.Location = new Point(166, 390);
+            button_SaveAccessRights.Name = "button_SaveAccessRights";
+            button_SaveAccessRights.Size = new Size(108, 23);
+            button_SaveAccessRights.TabIndex = 16;
+            button_SaveAccessRights.Text = "Update access";
+            button_SaveAccessRights.UseVisualStyleBackColor = true;
+            button_SaveAccessRights.Click += button_SaveAccessRights_Click;
             // 
             // button_RefreshFiles
             // 
@@ -209,16 +225,6 @@
             dataGridView_AccessRights.Size = new Size(262, 217);
             dataGridView_AccessRights.TabIndex = 14;
             // 
-            // button_SaveAccessRights
-            // 
-            button_SaveAccessRights.Location = new Point(166, 390);
-            button_SaveAccessRights.Name = "button_SaveAccessRights";
-            button_SaveAccessRights.Size = new Size(108, 23);
-            button_SaveAccessRights.TabIndex = 16;
-            button_SaveAccessRights.Text = "Update access";
-            button_SaveAccessRights.UseVisualStyleBackColor = true;
-            button_SaveAccessRights.Click += button_SaveAccessRights_Click;
-            // 
             // MainWind_RoleBased
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -230,6 +236,7 @@
             Controls.Add(button_LogOut);
             Controls.Add(button_Settings);
             Controls.Add(button_FileManager);
+            Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             Name = "MainWind_RoleBased";
             Text = "MainWind_RoleBased";
             SettingMenu.ResumeLayout(false);

@@ -45,6 +45,7 @@
             // 
             // button_FileManager
             // 
+            button_FileManager.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             button_FileManager.Location = new Point(23, 30);
             button_FileManager.Name = "button_FileManager";
             button_FileManager.Size = new Size(137, 23);
@@ -55,6 +56,7 @@
             // 
             // button_Settings
             // 
+            button_Settings.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             button_Settings.Location = new Point(25, 74);
             button_Settings.Name = "button_Settings";
             button_Settings.Size = new Size(135, 23);
@@ -65,6 +67,7 @@
             // 
             // button_LogOut
             // 
+            button_LogOut.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             button_LogOut.Location = new Point(46, 396);
             button_LogOut.Name = "button_LogOut";
             button_LogOut.Size = new Size(125, 23);
@@ -83,6 +86,7 @@
             SettingMenu.Controls.Add(label1);
             SettingMenu.Controls.Add(comboBox_Files);
             SettingMenu.Controls.Add(comboBox_Users);
+            SettingMenu.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             SettingMenu.Location = new Point(281, 30);
             SettingMenu.Name = "SettingMenu";
             SettingMenu.Size = new Size(469, 192);

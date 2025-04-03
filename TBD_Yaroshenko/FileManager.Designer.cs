@@ -57,12 +57,12 @@
             // 
             // listBoxFiles
             // 
-            listBoxFiles.Font = new Font("SimSun", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            listBoxFiles.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             listBoxFiles.FormattingEnabled = true;
-            listBoxFiles.ItemHeight = 14;
+            listBoxFiles.ItemHeight = 15;
             listBoxFiles.Location = new Point(24, 31);
             listBoxFiles.Name = "listBoxFiles";
-            listBoxFiles.Size = new Size(295, 270);
+            listBoxFiles.Size = new Size(295, 259);
             listBoxFiles.TabIndex = 0;
             listBoxFiles.SelectedIndexChanged += listBoxFiles_SelectedIndexChanged;
             // 
@@ -77,7 +77,7 @@
             // 
             // buttonRotate
             // 
-            buttonRotate.Font = new Font("SimSun", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            buttonRotate.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             buttonRotate.Location = new Point(402, 311);
             buttonRotate.Name = "buttonRotate";
             buttonRotate.Size = new Size(106, 26);
@@ -88,7 +88,7 @@
             // 
             // btnSave
             // 
-            btnSave.Font = new Font("SimSun", 10.8F);
+            btnSave.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
             btnSave.Location = new Point(558, 311);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(106, 26);
