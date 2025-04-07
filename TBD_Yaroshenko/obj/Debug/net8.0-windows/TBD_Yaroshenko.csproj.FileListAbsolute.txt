@@ -72,3 +72,13 @@ C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko
 C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\obj\Debug\net8.0-windows\TBD_Yaroshenko.pdb
 C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\obj\Debug\net8.0-windows\TBD_Yaroshenko.genruntimeconfig.cache
 C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\obj\Debug\net8.0-windows\ref\TBD_Yaroshenko.dll
+C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\bin\Debug\net8.0-windows\runtimes\win-x86\native\WebView2Loader.dll
+C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\bin\Debug\net8.0-windows\runtimes\win-x64\native\WebView2Loader.dll
+C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\bin\Debug\net8.0-windows\runtimes\win-arm64\native\WebView2Loader.dll
+C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\bin\Debug\net8.0-windows\Microsoft.Web.WebView2.Core.dll
+C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\bin\Debug\net8.0-windows\Microsoft.Web.WebView2.WinForms.dll
+C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\bin\Debug\net8.0-windows\Microsoft.Web.WebView2.Wpf.dll
+C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\bin\Debug\net8.0-windows\Microsoft.Web.WebView2.Core.xml
+C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\bin\Debug\net8.0-windows\Microsoft.Web.WebView2.WinForms.xml
+C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\bin\Debug\net8.0-windows\Microsoft.Web.WebView2.Wpf.xml
+C:\Users\Ярина\Desktop\NAU2025\TBD_Yaroshenko\TBD_Yaroshenko\TBD_Yaroshenko\obj\Debug\net8.0-windows\TBD_Yaroshenko.CaptchaForm.resources

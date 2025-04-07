@@ -1,0 +1,18 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>reCAPTCHA</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+    <form id="recaptchaForm">
+        <div class="g-recaptcha" data-sitekey="6LdmJg0rAAAAAGpRI31pfMPcrLP5IdZFTmS_-JM9" data-callback="onSuccess"></div>
+    </form>
+
+    <script type="text/javascript">
+        function onSuccess(token) {
+            window.external.RecaptchaCompleted(token);
+        }
+    </script>
+</body>
+</html>

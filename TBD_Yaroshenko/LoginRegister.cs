@@ -3,55 +3,89 @@ using System.Configuration;
 using System.Data;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Configuration;
+using Microsoft.Data.SqlClient;
 using System.Text;
 using System.Collections.Concurrent;
-using Microsoft.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
-
+using System.Security.Cryptography;
 
 namespace TBD_Yaroshenko
 {
     public partial class radioNoInfo : Form
     {
-        private string cs = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString; // Рядок підключення до БД
-        private string complexPattern = "(?=^.{8,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$"; // Патерн складності паролю
+        // Рядок підключення до бази даних з конфігурації
+        private string cs = ConfigurationManager.ConnectionStrings["dbtbdyaroshenko"].ConnectionString;
 
+        // Паттерн для перевірки складності пароля:
+        // - Мінімум 8 символів
+        // - Містить цифри або спецсимволи
+        // - Містить великі та малі літери
+        private string complexPattern = "(?=^.{8,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$";
+
+        // Час останнього натискання клавіші (для запобігання швидкому вводу)
+        private DateTime lastKeyPress = DateTime.MinValue;
+
+        // Максимальна кількість спроб входу
+        private const int MAX_ATTEMPTS = 3;
+
+        // Мінімальний інтервал між натисканнями клавіш (в мілісекундах)
+        private const int MIN_INPUT_DELAY_MS = 50;
 
         public radioNoInfo()
         {
             InitializeComponent();
             // Додаємо варіанти контролю доступу у комбобокс
             comboBoxAccessControl.Items.AddRange(new string[] { "Mandatory", "Discretionary", "Role-Based" });
-            comboBoxAccessControl.SelectedIndex = 0; // Встановлюємо значення за замовчуванням
+            comboBoxAccessControl.SelectedIndex = 0;
 
+            // Підключаємо обробники подій для поля пароля
+            textBox2.KeyPress += textBox2_KeyPress;
+            textBox2.KeyDown += textBox2_KeyDown;
 
+            // Вимкнення контекстного меню (щоб заборонити вставку)
+            textBox2.ContextMenuStrip = new ContextMenuStrip();
         }
 
-        // Обробник кнопки довідки
+        // Обробник пункту меню "Довідка"
         private void довідкаToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Performed by: Yaroshenko Iryna, group B-125-21-3-B");
+            MessageBox.Show("Completed by: Yaroshenko Iryna, group B-125-21-3-B", "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        // Метод для визначення складності паролю
+        // Визначення складності пароля
         private string GetPasswordComplexity(string password)
         {
             return Regex.IsMatch(password, complexPattern) ? "High" : "Low";
         }
 
-        // Метод для збереження історії паролів
+        // Збереження історії паролів
         private void SavePasswordHistory(string username, string password)
         {
             try
             {
+                // Отримання поточної солі для користувача
+                string currentSalt;
+                using (var con = new SqlConnection(cs))
+                using (var saltCmd = new SqlCommand("SELECT Salt FROM LOGIN_TBL WHERE USERNAME = @username", con))
+                {
+                    saltCmd.Parameters.AddWithValue("@username", username);
+                    con.Open();
+                    currentSalt = saltCmd.ExecuteScalar()?.ToString();
+                }
+
+                if (string.IsNullOrEmpty(currentSalt)) return;
+
+                // Шифрування пароля з поточною сіллю перед збереженням
+                string encryptedPassword = EncryptPassword(password, currentSalt);
+
+                // Збереження в історію
                 using (var con = new SqlConnection(cs))
                 using (var cmd = new SqlCommand(
                     "INSERT INTO PASSWORD_HISTORY (USERNAME, OLD_PASSWORD, CHANGE_DATE) VALUES (@username, @password, GETDATE())", con))
                 {
-                    cmd.Parameters.Add(new SqlParameter("@username", SqlDbType.VarChar, 50)).Value = username;
-                    cmd.Parameters.Add(new SqlParameter("@password", SqlDbType.VarChar, 100)).Value = password;
+                    cmd.Parameters.AddWithValue("@username", username);
+                    cmd.Parameters.AddWithValue("@password", encryptedPassword);
                     con.Open();
                     cmd.ExecuteNonQuery();
                 }
@@ -60,51 +94,94 @@ namespace TBD_Yaroshenko
             {
                 MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
-        // Метод для перевірки чи пароль був використаний раніше
+        // Перевірка, чи пароль використовувався раніше
         private bool IsPasswordInHistory(string username, string password)
         {
             try
             {
+                // Отримання поточної солі користувача
+                string currentSalt;
+                using (var con = new SqlConnection(cs))
+                using (var saltCmd = new SqlCommand("SELECT Salt FROM LOGIN_TBL WHERE USERNAME = @username", con))
+                {
+                    saltCmd.Parameters.AddWithValue("@username", username);
+                    con.Open();
+                    currentSalt = saltCmd.ExecuteScalar()?.ToString();
+                }
+
+                if (string.IsNullOrEmpty(currentSalt)) return false;
+
+                // Шифрування нового пароля для порівняння
+                string encryptedNewPassword = EncryptPassword(password, currentSalt);
+
+                // Перевірка проти останніх 3 паролів в історії
                 using (var con = new SqlConnection(cs))
                 using (var cmd = new SqlCommand(
-                    "SELECT COUNT(*) FROM (SELECT TOP 3 OLD_PASSWORD FROM PASSWORD_HISTORY WHERE USERNAME = @username ORDER BY CHANGE_DATE DESC) AS LastPasswords WHERE OLD_PASSWORD = @password", con))
+                    @"SELECT COUNT(*) FROM (
+                        SELECT TOP 3 OLD_PASSWORD 
+                        FROM PASSWORD_HISTORY 
+                        WHERE USERNAME = @username 
+                        ORDER BY CHANGE_DATE DESC
+                      ) AS LastPasswords 
+                      WHERE OLD_PASSWORD = @password", con))
                 {
-                    cmd.Parameters.Add(new SqlParameter("@username", SqlDbType.VarChar, 50)).Value = username;
-                    cmd.Parameters.Add(new SqlParameter("@password", SqlDbType.VarChar, 100)).Value = password;
+                    cmd.Parameters.AddWithValue("@username", username);
+                    cmd.Parameters.AddWithValue("@password", encryptedNewPassword);
                     con.Open();
                     return (int)cmd.ExecuteScalar() > 0;
                 }
             }
             catch (SqlException ex)
             {
-                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Database Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
 
-        // Обробник зміни стану чекбоксу для показу паролю
+        // Обробник зміни стану чекбоксу "Показати пароль"
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             textBox2.UseSystemPasswordChar = !checkBox1.Checked;
         }
 
-        // Обробник зміни стану чекбоксу для перевірки складності паролю
+        // Обробник зміни стану чекбоксу "Перевірити складність"
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBox2.Checked && !Regex.IsMatch(textBox2.Text, complexPattern))
             {
-                MessageBox.Show("The current password does not meet the new complexity requirements", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Current password does not meet complexity requirements", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        // Запобігання швидкому вводу
+        private void textBox2_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            TimeSpan timeSinceLastPress = DateTime.Now - lastKeyPress;
+            if (timeSinceLastPress.TotalMilliseconds < MIN_INPUT_DELAY_MS)
+            {
+                e.Handled = true;
+                MessageBox.Show("Too fast input. Please enter the password manually.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            lastKeyPress = DateTime.Now;
+
+            // Блокування спеціальних символів (крім Backspace)
+            if (char.IsControl(e.KeyChar) && e.KeyChar != '\b')
+            {
+                e.Handled = true;
+            }
+        }
+
+        // Запобігання вставці тексту
+        private void textBox2_KeyDown(object sender, KeyEventArgs e)
+        {
+            if ((e.Control && e.KeyCode == Keys.V) || (e.Shift && e.KeyCode == Keys.Insert))
+            {
+                e.SuppressKeyPress = true;
+                e.Handled = true;
+                MessageBox.Show("Password insertion is prohibited. Enter the password manually.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -117,55 +194,200 @@ namespace TBD_Yaroshenko
                 return;
             }
 
+            string username = textBox1.Text;
             string accessControlType = comboBoxAccessControl.SelectedItem?.ToString() ?? "Undefined";
 
             using (var con = new SqlConnection(cs))
             {
                 con.Open();
 
-                string query = "SELECT * FROM LOGIN_TBL WHERE USERNAME = @user AND PASS = @pass";
-                var cmd = new SqlCommand(query, con);
-                cmd.Parameters.AddWithValue("@user", textBox1.Text);
-                cmd.Parameters.AddWithValue("@pass", textBox2.Text);
-                var dr = cmd.ExecuteReader();
+                // Отримання даних користувача
+                var userCheckCmd = new SqlCommand(
+                    "SELECT Salt, IsBlocked, FailedAttempts, PASSWORD_CREATION_DATE, PASSWORD_EXPIRY_DAYS " +
+                    "FROM LOGIN_TBL WHERE USERNAME = @user", con);
+                userCheckCmd.Parameters.AddWithValue("@user", username);
 
-                if (dr.HasRows)
+                string salt = null;
+                bool isBlocked = false;
+                int failedAttempts = 0;
+                DateTime? creationDate = null;
+                int expiryDays = 0;
+
+                using (var reader = userCheckCmd.ExecuteReader())
                 {
-                    dr.Read();
-                    string securityLevel = dr["SECURITY_LEVEL"]?.ToString() ?? "Unclassified"; // Змінили ім'я змінної
-                    string userRole = dr["ROLE"]?.ToString() ?? "User"; // Використовуємо інше ім'я змінної
+                    if (reader.Read())
+                    {
+                        salt = reader["Salt"]?.ToString();
+                        isBlocked = reader.GetBoolean(1);
+                        failedAttempts = reader.GetInt32(2);
+                        creationDate = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3);
+                        expiryDays = reader.GetInt32(4);
+                    }
+                }
 
-                    dr.Close();
+                if (string.IsNullOrEmpty(salt))
+                {
+                    MessageBox.Show("Invalid username or password", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                if (isBlocked)
+                {
+                    MessageBox.Show("This account has been blocked due to too many failed attempts", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // CAPTCHA після 1 невдалої спроби
+                if (failedAttempts >= 1)
+                {
+                    using (CaptchaForm captchaForm = new CaptchaForm())
+                    {
+                        if (captchaForm.ShowDialog() != DialogResult.OK)
+                        {
+                            MessageBox.Show("You failed the CAPTCHA", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                    }
+                }
+
+                // Перевірка терміну дії пароля
+                if (creationDate.HasValue)
+                {
+                    DateTime expiryDate = creationDate.Value.AddDays(expiryDays);
+                    int daysRemaining = (int)(expiryDate - DateTime.Now).TotalDays;
+
+                    if (DateTime.Now > expiryDate)
+                    {
+                        MessageBox.Show("Your password has expired. Please change your password.",
+                        "Password Expiry", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    else if (daysRemaining <= 7)
+                    {
+                        MessageBox.Show($"Warning! Your password will expire in {daysRemaining} days.",
+                        "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+
+                // Шифрування введеного пароля
+                string encryptedPassword = EncryptPassword(textBox2.Text, salt);
+
+                // Перевірка облікових даних
+                string query = "SELECT SECURITY_LEVEL, ROLE FROM LOGIN_TBL WHERE USERNAME = @user AND PASS = @pass";
+                var cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@user", username);
+                cmd.Parameters.AddWithValue("@pass", encryptedPassword);
+
+                string securityLevel = null;
+                string userRole = null;
+                bool loginSuccessful = false;
+
+                using (var dr = cmd.ExecuteReader())
+                {
+                    if (dr.HasRows)
+                    {
+                        dr.Read();
+                        securityLevel = dr["SECURITY_LEVEL"]?.ToString() ?? "Unclassified";
+                        userRole = dr["ROLE"]?.ToString() ?? "User";
+                        loginSuccessful = true;
+                    }
+                }
+
+                if (loginSuccessful)
+                {
+                    // Скидання лічильника невдалих спроб
+                    string resetAttemptsQuery = "UPDATE LOGIN_TBL SET FailedAttempts = 0, IsBlocked = 0 WHERE USERNAME = @user";
+                    var resetCmd = new SqlCommand(resetAttemptsQuery, con);
+                    resetCmd.Parameters.AddWithValue("@user", username);
+                    resetCmd.ExecuteNonQuery();
+
+                    // Оновлення типу контролю доступу
                     string updateQuery = "UPDATE LOGIN_TBL SET ACCESS_CONTROL_TYPE = @accessControlType WHERE USERNAME = @user";
                     var updateCmd = new SqlCommand(updateQuery, con);
                     updateCmd.Parameters.AddWithValue("@accessControlType", accessControlType);
-                    updateCmd.Parameters.AddWithValue("@user", textBox1.Text);
+                    updateCmd.Parameters.AddWithValue("@user", username);
                     updateCmd.ExecuteNonQuery();
 
-                    MessageBox.Show($"Login successful! Security Level: {securityLevel}, Access Control Type: {accessControlType}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"Login successful! Security Level: {securityLevel}, Access Control Type: {accessControlType}",
+ "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+                    // Відкриття відповідної головної форми
                     if (accessControlType == "Discretionary")
                     {
-                        MainWind_Discretionary mainWindDiscretionary = new MainWind_Discretionary(textBox1.Text, accessControlType);
+                        MainWind_Discretionary mainWindDiscretionary = new MainWind_Discretionary(username, accessControlType);
                         mainWindDiscretionary.Show();
                     }
                     else if (accessControlType == "Role-Based")
                     {
-                        MainWind_RoleBased mainWindRoleBased = new MainWind_RoleBased(textBox1.Text, userRole); // Використовуємо userRole
+                        MainWind_RoleBased mainWindRoleBased = new MainWind_RoleBased(username, userRole);
                         mainWindRoleBased.Show();
                     }
                     else
                     {
-                        MainWind mainWind = new MainWind(textBox1.Text);
+                        MainWind mainWind = new MainWind(username);
                         mainWind.Show();
                     }
-
                     this.Hide();
                 }
                 else
                 {
-                    MessageBox.Show("Authorization error. Incorrect login or password.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // Оновлення лічильника невдалих спроб
+                    string updateAttemptsQuery = @"
+                        UPDATE LOGIN_TBL 
+                        SET FailedAttempts = FailedAttempts + 1,
+                            IsBlocked = CASE WHEN FailedAttempts + 1 >= @maxAttempts THEN 1 ELSE 0 END
+                        WHERE USERNAME = @user";
+                    var updateCmd = new SqlCommand(updateAttemptsQuery, con);
+                    updateCmd.Parameters.AddWithValue("@user", username);
+                    updateCmd.Parameters.AddWithValue("@maxAttempts", MAX_ATTEMPTS);
+                    updateCmd.ExecuteNonQuery();
+
+                    // Отримання оновлених даних
+                    var checkCmd = new SqlCommand("SELECT FailedAttempts, IsBlocked FROM LOGIN_TBL WHERE USERNAME = @user", con);
+                    checkCmd.Parameters.AddWithValue("@user", username);
+                    using (var reader = checkCmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            failedAttempts = reader.GetInt32(0);
+                            isBlocked = reader.GetBoolean(1);
+
+                            if (isBlocked)
+                            {
+                                MessageBox.Show("This account has been blocked due to too many failed attempts",
+                                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            else
+                            {
+                                MessageBox.Show($"Login failed. Invalid username or password. Remaining attempts: {MAX_ATTEMPTS - failedAttempts}",
+                                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                    }
                 }
+            }
+        }
+
+        // Генерація солі для пароля
+        private string GenerateSalt()
+        {
+            byte[] saltBytes = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(saltBytes);
+            }
+            return Convert.ToBase64String(saltBytes);
+        }
+
+        // Шифрування пароля з використанням солі
+        private string EncryptPassword(string password, string salt)
+        {
+            byte[] saltBytes = Convert.FromBase64String(salt);
+
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, 10000))
+            {
+                byte[] hash = pbkdf2.GetBytes(32); // 256-бітний вихід
+                return Convert.ToBase64String(hash);
             }
         }
 
@@ -174,48 +396,36 @@ namespace TBD_Yaroshenko
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text) || string.IsNullOrWhiteSpace(textBox2.Text))
             {
-                MessageBox.Show("Fill in all fields", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please fill in all fields", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (checkBox2.Checked && !Regex.IsMatch(textBox2.Text, complexPattern))
             {
-                MessageBox.Show("The password does not meet the complexity requirements", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Password does not meet complexity requirements", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             try
             {
+                string salt = GenerateSalt();
+                string encryptedPassword = EncryptPassword(textBox2.Text, salt);
                 using (var con = new SqlConnection(cs))
-                using (var checkCmd = new SqlCommand("SELECT COUNT(*) FROM LOGIN_TBL WHERE USERNAME = @user", con))
+                using (var cmd = new SqlCommand(
+                    "INSERT INTO LOGIN_TBL (USERNAME, PASS, PASSWORD_COMPLEXITY, SECURITY_LEVEL, ACCESS_CONTROL_TYPE, PASSWORD_CREATION_DATE, PASSWORD_EXPIRY_DAYS, IsBlocked, FailedAttempts, Salt) " +
+                    "VALUES (@user, @pass, @complexity, 'Не класифіковано', @accessControlType, GETDATE(), @expiryDays, 0, 0, @salt)", con))
                 {
-                    checkCmd.Parameters.Add(new SqlParameter("@user", SqlDbType.VarChar, 50)).Value = textBox1.Text;
+                    cmd.Parameters.AddWithValue("@user", textBox1.Text);
+                    cmd.Parameters.AddWithValue("@pass", encryptedPassword);
+                    cmd.Parameters.AddWithValue("@complexity", GetPasswordComplexity(textBox2.Text));
+                    cmd.Parameters.AddWithValue("@accessControlType", comboBoxAccessControl.SelectedItem?.ToString() ?? "Не визначено");
+                    cmd.Parameters.AddWithValue("@expiryDays", numExpiryDays.Value);
+                    cmd.Parameters.AddWithValue("@salt", salt);
+
                     con.Open();
-                    if ((int)checkCmd.ExecuteScalar() > 0)
-                    {
-                        MessageBox.Show("User already exists", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
-                    }
-
-                    // Отримуємо вибраний тип контролю доступу
-                    string accessControlType = comboBoxAccessControl.SelectedItem?.ToString() ?? "Undefined";
-
-                    using (var insertCmd = new SqlCommand(
-                        "INSERT INTO LOGIN_TBL (USERNAME, PASS, PASSWORD_COMPLEXITY, SECURITY_LEVEL, ACCESS_CONTROL_TYPE) VALUES (@user, @pass, @complexity, 'Unclassified', @accessControlType)", con))
-                    {
-                        insertCmd.Parameters.Add(new SqlParameter("@user", SqlDbType.VarChar, 50)).Value = textBox1.Text;
-                        insertCmd.Parameters.Add(new SqlParameter("@pass", SqlDbType.VarChar, 100)).Value = textBox2.Text;
-                        insertCmd.Parameters.Add(new SqlParameter("@complexity", SqlDbType.VarChar, 10)).Value = GetPasswordComplexity(textBox2.Text);
-                        insertCmd.Parameters.Add(new SqlParameter("@accessControlType", SqlDbType.VarChar, 20)).Value = accessControlType;
-                        insertCmd.ExecuteNonQuery();
-                    }
-
-                    MessageBox.Show("User added successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    cmd.ExecuteNonQuery();
+                    MessageBox.Show("User successfully registered", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-            }
-            catch (SqlException ex)
-            {
-                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -223,56 +433,116 @@ namespace TBD_Yaroshenko
             }
         }
 
-        // Обробник кнопки зміни паролю
+        // Обробник кнопки зміни пароля
         private void button3_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text) || string.IsNullOrWhiteSpace(textBox2.Text))
             {
-                MessageBox.Show("Fill in all fields", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please fill in all fields", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (checkBox2.Checked && !Regex.IsMatch(textBox2.Text, complexPattern))
-            {
-                MessageBox.Show("The new password does not meet complexity requirements", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (IsPasswordInHistory(textBox1.Text, textBox2.Text))
-            {
-                MessageBox.Show("Cannot use one of the last three passwords", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            string username = textBox1.Text;
+            string newPassword = textBox2.Text;
 
             try
             {
-                using (var con = new SqlConnection(cs))
+                using (SqlConnection con = new SqlConnection(cs))
                 {
-                    // Визначаємо складність нового пароля
-                    string newPasswordComplexity = GetPasswordComplexity(textBox2.Text);
+                    con.Open();
 
-                    // Оновлюємо пароль і складність пароля
-                    using (var cmd = new SqlCommand("UPDATE LOGIN_TBL SET PASS = @newPass, PASSWORD_COMPLEXITY = @complexity WHERE USERNAME = @user", con))
+                    // 1. Отримання поточної інформації про користувача
+                    string currentPassword, currentSalt;
+                    using (SqlCommand cmd = new SqlCommand(
+                        "SELECT PASS, Salt FROM LOGIN_TBL WHERE USERNAME = @username", con))
                     {
-                        cmd.Parameters.Add(new SqlParameter("@user", SqlDbType.VarChar, 50)).Value = textBox1.Text;
-                        cmd.Parameters.Add(new SqlParameter("@newPass", SqlDbType.VarChar, 100)).Value = textBox2.Text;
-                        cmd.Parameters.Add(new SqlParameter("@complexity", SqlDbType.VarChar, 10)).Value = newPasswordComplexity;
-                        con.Open();
-                        if (cmd.ExecuteNonQuery() > 0)
+                        cmd.Parameters.AddWithValue("@username", username);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
                         {
-                            SavePasswordHistory(textBox1.Text, textBox2.Text);
-                            MessageBox.Show("Password successfully updated", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            if (!reader.Read())
+                            {
+                                MessageBox.Show("User not found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
+                            }
+                            currentPassword = reader["PASS"].ToString();
+                            currentSalt = reader["Salt"].ToString();
+                        }
+                    }
+
+                    // 2. Перевірка, чи новий пароль відрізняється від поточного
+                    string encryptedNewPassword = EncryptPassword(newPassword, currentSalt);
+                    if (encryptedNewPassword == currentPassword)
+                    {
+                        MessageBox.Show("New password cannot be the same as current password",
+                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // 3. Перевірка проти останніх 3 паролів в історії
+                    using (SqlCommand cmd = new SqlCommand(
+                        @"SELECT TOP 3 OLD_PASSWORD, Salt FROM PASSWORD_HISTORY 
+                          WHERE USERNAME = @username 
+                          ORDER BY CHANGE_DATE DESC", con))
+                    {
+                        cmd.Parameters.AddWithValue("@username", username);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                string oldPassword = reader["OLD_PASSWORD"].ToString();
+                                string oldSalt = reader["Salt"].ToString();
+
+                                // Повторне шифрування нового пароля для порівняння
+                                string testPassword = EncryptPassword(newPassword, oldSalt);
+                                if (testPassword == oldPassword)
+                                {
+                                    MessageBox.Show("You cannot use one of the last 3 passwords",
+                                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    // 4. Генерація нової солі для нового пароля
+                    string newSalt = GenerateSalt();
+                    string newEncryptedPassword = EncryptPassword(newPassword, newSalt);
+
+                    // 5. Збереження поточного пароля в історію перед зміною
+                    using (SqlCommand cmd = new SqlCommand(
+                        "INSERT INTO PASSWORD_HISTORY (USERNAME, OLD_PASSWORD, Salt) " +
+                        "VALUES (@username, @oldPassword, @salt)", con))
+                    {
+                        cmd.Parameters.AddWithValue("@username", username);
+                        cmd.Parameters.AddWithValue("@oldPassword", currentPassword);
+                        cmd.Parameters.AddWithValue("@salt", currentSalt);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    // 6. Оновлення пароля в основній таблиці
+                    using (SqlCommand cmd = new SqlCommand(
+                        "UPDATE LOGIN_TBL SET PASS = @newPass, Salt = @newSalt, " +
+                        "PASSWORD_COMPLEXITY = @complexity, PASSWORD_CREATION_DATE = GETDATE() " +
+                        "WHERE USERNAME = @username", con))
+                    {
+                        cmd.Parameters.AddWithValue("@username", username);
+                        cmd.Parameters.AddWithValue("@newPass", newEncryptedPassword);
+                        cmd.Parameters.AddWithValue("@newSalt", newSalt);
+                        cmd.Parameters.AddWithValue("@complexity", GetPasswordComplexity(newPassword));
+
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            MessageBox.Show("Password updated successfully",
+                            "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
                         {
-                            MessageBox.Show("User not found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Password update failed",
+                            "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                 }
-            }
-            catch (SqlException ex)
-            {
-                MessageBox.Show($"Database error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
@@ -280,13 +550,16 @@ namespace TBD_Yaroshenko
             }
         }
 
+        // Обробник завантаження форми
         private void Form1_Load(object sender, EventArgs e)
         {
-            // Обробник завантаження форми
+            
         }
+    
+
         #region Brute Force Implementation
 
-        private volatile bool isBruteForceRunning = false;
+private volatile bool isBruteForceRunning = false;
         private DateTime bruteForceStartTime;
         private string currentUsername;
         private string foundPassword;
@@ -1129,6 +1402,5 @@ namespace TBD_Yaroshenko
 
         #endregion
 
-        
     }
 }

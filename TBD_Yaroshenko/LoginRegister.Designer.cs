@@ -39,6 +39,8 @@
             errorProvider1 = new ErrorProvider(components);
             errorProvider2 = new ErrorProvider(components);
             groupBox1 = new GroupBox();
+            numExpiryDays = new NumericUpDown();
+            lblExpiryDays = new Label();
             button2 = new Button();
             checkBox2 = new CheckBox();
             button3 = new Button();
@@ -67,10 +69,12 @@
             numLength = new NumericUpDown();
             lblBruteUser = new Label();
             txtBruteUser = new TextBox();
+            panelRecaptcha = new Panel();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)errorProvider2).BeginInit();
             groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numExpiryDays).BeginInit();
             panel1.SuspendLayout();
             groupBoxBruteForce.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numLength).BeginInit();
@@ -101,7 +105,7 @@
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
-            label1.Location = new Point(20, 41);
+            label1.Location = new Point(11, 32);
             label1.Name = "label1";
             label1.Size = new Size(36, 15);
             label1.TabIndex = 1;
@@ -111,7 +115,7 @@
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
-            label2.Location = new Point(20, 72);
+            label2.Location = new Point(11, 64);
             label2.Name = "label2";
             label2.Size = new Size(57, 15);
             label2.TabIndex = 2;
@@ -119,7 +123,7 @@
             // 
             // textBox1
             // 
-            textBox1.Location = new Point(95, 38);
+            textBox1.Location = new Point(86, 29);
             textBox1.Margin = new Padding(3, 2, 3, 2);
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(156, 23);
@@ -127,7 +131,7 @@
             // 
             // textBox2
             // 
-            textBox2.Location = new Point(95, 65);
+            textBox2.Location = new Point(86, 56);
             textBox2.Margin = new Padding(3, 2, 3, 2);
             textBox2.Name = "textBox2";
             textBox2.Size = new Size(156, 23);
@@ -137,7 +141,7 @@
             // button1
             // 
             button1.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
-            button1.Location = new Point(0, 165);
+            button1.Location = new Point(11, 183);
             button1.Margin = new Padding(3, 2, 3, 2);
             button1.Name = "button1";
             button1.Size = new Size(135, 31);
@@ -157,6 +161,9 @@
             // groupBox1
             // 
             groupBox1.BackColor = Color.FromArgb(224, 224, 224);
+            groupBox1.Controls.Add(panelRecaptcha);
+            groupBox1.Controls.Add(numExpiryDays);
+            groupBox1.Controls.Add(lblExpiryDays);
             groupBox1.Controls.Add(button2);
             groupBox1.Controls.Add(checkBox2);
             groupBox1.Controls.Add(button3);
@@ -171,14 +178,33 @@
             groupBox1.Margin = new Padding(3, 2, 3, 2);
             groupBox1.Name = "groupBox1";
             groupBox1.Padding = new Padding(3, 2, 3, 2);
-            groupBox1.Size = new Size(302, 237);
+            groupBox1.Size = new Size(337, 295);
             groupBox1.TabIndex = 3;
             groupBox1.TabStop = false;
+            // 
+            // numExpiryDays
+            // 
+            numExpiryDays.Location = new Point(198, 93);
+            numExpiryDays.Maximum = new decimal(new int[] { 365, 0, 0, 0 });
+            numExpiryDays.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numExpiryDays.Name = "numExpiryDays";
+            numExpiryDays.Size = new Size(44, 23);
+            numExpiryDays.TabIndex = 8;
+            numExpiryDays.Value = new decimal(new int[] { 30, 0, 0, 0 });
+            // 
+            // lblExpiryDays
+            // 
+            lblExpiryDays.AutoSize = true;
+            lblExpiryDays.Location = new Point(11, 95);
+            lblExpiryDays.Name = "lblExpiryDays";
+            lblExpiryDays.Size = new Size(178, 15);
+            lblExpiryDays.TabIndex = 7;
+            lblExpiryDays.Text = "Password expiration date (days):";
             // 
             // button2
             // 
             button2.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
-            button2.Location = new Point(0, 131);
+            button2.Location = new Point(11, 149);
             button2.Margin = new Padding(3, 2, 3, 2);
             button2.Name = "button2";
             button2.Size = new Size(135, 30);
@@ -191,7 +217,7 @@
             // 
             checkBox2.AutoSize = true;
             checkBox2.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
-            checkBox2.Location = new Point(6, 102);
+            checkBox2.Location = new Point(11, 121);
             checkBox2.Margin = new Padding(3, 2, 3, 2);
             checkBox2.Name = "checkBox2";
             checkBox2.Size = new Size(113, 19);
@@ -202,7 +228,7 @@
             // button3
             // 
             button3.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
-            button3.Location = new Point(0, 200);
+            button3.Location = new Point(11, 218);
             button3.Margin = new Padding(3, 2, 3, 2);
             button3.Name = "button3";
             button3.Size = new Size(135, 33);
@@ -215,7 +241,7 @@
             // 
             checkBox1.AutoSize = true;
             checkBox1.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
-            checkBox1.Location = new Point(156, 102);
+            checkBox1.Location = new Point(135, 121);
             checkBox1.Margin = new Padding(3, 2, 3, 2);
             checkBox1.Name = "checkBox1";
             checkBox1.Size = new Size(107, 19);
@@ -229,7 +255,7 @@
             panel1.Controls.Add(label3);
             panel1.Controls.Add(comboBoxAccessControl);
             panel1.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
-            panel1.Location = new Point(10, 266);
+            panel1.Location = new Point(10, 340);
             panel1.Name = "panel1";
             panel1.Size = new Size(302, 103);
             panel1.TabIndex = 4;
@@ -479,6 +505,13 @@
             txtBruteUser.Size = new Size(149, 23);
             txtBruteUser.TabIndex = 0;
             // 
+            // panelRecaptcha
+            // 
+            panelRecaptcha.Location = new Point(166, 151);
+            panelRecaptcha.Name = "panelRecaptcha";
+            panelRecaptcha.Size = new Size(150, 100);
+            panelRecaptcha.TabIndex = 9;
+            // 
             // radioNoInfo
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -500,6 +533,7 @@
             ((System.ComponentModel.ISupportInitialize)errorProvider2).EndInit();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numExpiryDays).EndInit();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             groupBoxBruteForce.ResumeLayout(false);
@@ -549,5 +583,8 @@
         private Button btnStopDictionary;
         private Button btnStartDictionary;
         private Label lblProgress;
+        private Label lblExpiryDays;
+        private NumericUpDown numExpiryDays;
+        private Panel panelRecaptcha;
     }
 }
